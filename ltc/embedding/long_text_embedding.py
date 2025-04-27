@@ -14,7 +14,8 @@ def long_text_embedding(text: str, max_length: int,
     def chunk_embedding(input_tup: tuple[int, str]) -> tuple[int, torch.Tensor]:
         return input_tup[0], bert_model.encode(input_tup[1])
 
-    logger.debug(f'Embedding text: \"{text if len(text) < 128 else text[:128] + "..."}\".')
+    _text_to_show = text.replace("\n", str())
+    logger.debug(f'Embedding text \"{_text_to_show if len(_text_to_show) < 128 else _text_to_show[:128] + "..."}\".')
     if bert_model is None:
         bert_model = SentenceTransformer(
             model_name_or_path='moka-ai/m3e-small',
