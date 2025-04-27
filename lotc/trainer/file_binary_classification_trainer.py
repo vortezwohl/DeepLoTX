@@ -26,7 +26,7 @@ class FileBinaryClassifierTrainer(BaseTrainer):
         self._chunk_size = chunk_size
 
     @override
-    def train(self, positive_file_path: str, negative_file_path: str, model: LogisticRegression | None = None) -> LogisticRegression:
+    def train(self, positive_file_path: str, negative_file_path: str) -> LogisticRegression:
         pos_files = get_files(positive_file_path)
         neg_files = get_files(negative_file_path)
         min_length = min(len(pos_files), len(neg_files))
@@ -46,18 +46,18 @@ class FileBinaryClassifierTrainer(BaseTrainer):
         valid_dataset = TensorDataset(inputs[train_size:], labels[train_size:])
         train_loader = DataLoader(train_dataset, batch_size=self._batch_size, shuffle=True)
         valid_loader = DataLoader(valid_dataset, batch_size=self._batch_size, shuffle=True)
-        if model is not None and model.fc1.in_features != feature_dim:
+        if self.model is not None and self.model.fc1.in_features != feature_dim:
             logger.warning("The dimension of features doesn't match. A new model instance will be created.")
-            model = None
-        if model is None:
-            model = LogisticRegression(input_dim=feature_dim, train=True)
+            self.model = None
+        if self.model is None:
+            self.model = LogisticRegression(input_dim=feature_dim, train=True)
         loss_function = nn.BCELoss()
-        optimizer = optim.Adam(model.parameters(), lr=self._learning_rate)
+        optimizer = optim.Adam(self.model.parameters(), lr=self._learning_rate)
         for epoch in range(self._num_epochs):
-            model.train()
+            self.model.train()
             total_loss = 0.0
             for batch_texts, batch_labels in train_loader:
-                outputs = model(batch_texts)
+                outputs = self.model(batch_texts)
                 loss = loss_function(outputs, batch_labels)
                 optimizer.zero_grad()
                 loss.backward()
@@ -67,11 +67,11 @@ class FileBinaryClassifierTrainer(BaseTrainer):
                 total_valid_loss = 0.0
                 for batch_texts, batch_labels in valid_loader:
                     with torch.no_grad():
-                        model._train = False
-                        outputs = model(batch_texts)
+                        self.model._train = False
+                        outputs = self.model(batch_texts)
                         loss = loss_function(outputs, batch_labels)
                         total_valid_loss += loss.item()
-                        model._train = True
+                        self.model._train = True
                 logger.debug(f"Epoch {epoch + 1}/{self._num_epochs} | "
                              f"Train Loss: {total_loss:.4f} | "
                              f"Valid Loss: {total_valid_loss:.4f}")
@@ -80,8 +80,12 @@ class FileBinaryClassifierTrainer(BaseTrainer):
             logger.debug(f"Epoch {epoch + 1}/{self._num_epochs} | Train Loss: {total_loss:.4f}")
             if total_loss < self._train_loss_threshold:
                 break
-        return model
+        return self.model
 
     @override
-    def load(self, model: nn.Module) -> LogisticRegression:
-        return super().load(model)
+    def save(self) -> LogisticRegression:
+        return super().save()
+
+    @override
+    def load(self) -> LogisticRegression:
+        return super().load()

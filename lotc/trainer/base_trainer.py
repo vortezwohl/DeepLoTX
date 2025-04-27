@@ -15,13 +15,15 @@ class BaseTrainer(object):
         self._train_ratio = train_ratio
         self._train_loss_threshold = train_loss_threshold
         self._valid_loss_threshold = valid_loss_threshold
+        self.model = None
 
     @abstractmethod
     def train(self, *args, **kwargs): ...
 
-    def save(self, model: nn.Module):
-        torch.save(model.state_dict(), f'{self._model_name}.lotc.pth')
+    def save(self):
+        torch.save(self.model.state_dict(), f'{self._model_name}.lotc.pth')
+        return self.model
 
-    def load(self, model: nn.Module):
-        model.load_state_dict(torch.load(f'{self._model_name}.lotc.pth'))
-        return model
+    def load(self):
+        self.model.load_state_dict(torch.load(f'{self._model_name}.lotc.pth'))
+        return self.model
