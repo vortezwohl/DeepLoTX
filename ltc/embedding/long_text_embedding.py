@@ -27,8 +27,3 @@ def long_text_embedding(text: str, max_length: int,
     for emb in fin_embedding:
         fin_emb_tensor = torch.cat((fin_emb_tensor, torch.tensor(emb, dtype=torch.float32)), dim=0)
     return fin_emb_tensor.shape[-1], fin_emb_tensor
-
-
-if __name__ == '__main__':
-    res = long_text_embedding('niha0', max_length=1050)
-    print(res)
