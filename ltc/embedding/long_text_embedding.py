@@ -3,6 +3,8 @@ from concurrent.futures import ThreadPoolExecutor
 import torch
 from sentence_transformers import SentenceTransformer
 
+from ltc import __ROOT__
+
 
 def long_text_embedding(text: str, max_length: int,
                         chunk_size: int = 128, bert_model: SentenceTransformer = None) -> tuple[int, torch.Tensor]:
@@ -10,7 +12,10 @@ def long_text_embedding(text: str, max_length: int,
         return input_tup[0], bert_model.encode(input_tup[1])
 
     if bert_model is None:
-        bert_model = SentenceTransformer('moka-ai/m3e-small')
+        bert_model = SentenceTransformer(
+            model_name_or_path='moka-ai/m3e-small',
+            cache_folder=f'{__ROOT__}\\.cache'
+        )
     _text = text.strip()
     if len(_text) < max_length:
         _text += '.' * (max_length - len(_text))
