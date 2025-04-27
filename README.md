@@ -1,4 +1,4 @@
-# LTC: Easy-2-use LongTextClassifier Trainers
+# LOTC: Easy2UseLongTextClassifierTrainers
 
 ## Installation
 
