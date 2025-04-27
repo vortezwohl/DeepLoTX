@@ -2,6 +2,15 @@
 
 ## Installation
 
-```
-pip install git+https://github.com/vortezwohl/LTC-LongTextClassifier.git
-```
+- Install with pip
+
+    ```
+    pip install git+https://github.com/vortezwohl/LOTC-Easy2UseLongTextClassifierTrainers.git
+    ```
+
+- Install with uv
+
+    ```
+    uv add git+https://github.com/vortezwohl/LOTC-Easy2UseLongTextClassifierTrainers.git
+    ```
+  
