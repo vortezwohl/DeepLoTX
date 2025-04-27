@@ -12,7 +12,7 @@ logger = logging.getLogger('lotc.embedding')
 
 
 def long_text_embedding(text: str, max_length: int,
-                        chunk_size: int = 128,
+                        chunk_size: int = 256,
                         bert_model_name_or_path: str = 'moka-ai/m3e-small') -> tuple[int, torch.Tensor]:
     def chunk_embedding(input_tup: tuple[int, str]) -> tuple[int, torch.Tensor]:
         return input_tup[0], bert_model.encode(input_tup[1])

@@ -21,3 +21,7 @@ class BaseTrainer(object):
 
     def save(self, model: nn.Module):
         torch.save(model.state_dict(), f'{self._model_name}.lotc.pth')
+
+    def load(self, model: nn.Module):
+        model.load_state_dict(torch.load(f'{self._model_name}.lotc.pth'))
+        return model

@@ -77,3 +77,7 @@ class FileBinaryClassifierTrainer(BaseTrainer):
             if total_loss < self._train_loss_threshold:
                 break
         return model
+
+    @override
+    def load(self, model: nn.Module) -> LogisticRegression:
+        return super().load(model)
