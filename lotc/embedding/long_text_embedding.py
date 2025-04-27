@@ -18,7 +18,7 @@ def long_text_embedding(text: str, max_length: int,
         return input_tup[0], bert_model.encode(input_tup[1])
 
     _text_to_show = text.replace("\n", str())
-    logger.debug(f'Embedding text \"{_text_to_show if len(_text_to_show) < 128 else _text_to_show[:128] + "..."}\".')
+    logger.debug(f'Embedding \"{_text_to_show if len(_text_to_show) < 128 else _text_to_show[:128] + "..."}\".')
     # read cache
     _text_hash = md5(text)
     if _text_hash in CACHE.keys():
