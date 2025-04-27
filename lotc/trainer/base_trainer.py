@@ -16,4 +16,4 @@ class BaseTrainer(object):
     def train(self, *args, **kwargs): ...
 
     def save(self, model: nn.Module):
-        torch.save(model.state_dict(), f'{self._model_name}.pth')
+        torch.save(model.state_dict(), f'{self._model_name}.lotc.pth')

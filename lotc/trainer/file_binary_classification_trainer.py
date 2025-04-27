@@ -5,12 +5,12 @@ import torch
 from torch import nn, optim
 from torch.utils.data import DataLoader, TensorDataset
 
-from ltc.util.read_file import get_files, read_file
-from ltc.embedding.long_text_embedding import long_text_embedding
-from ltc.nn.logistic_regression import LogisticRegression
-from ltc.trainer.base_trainer import BaseTrainer
+from lotc.util.read_file import get_files, read_file
+from lotc.embedding.long_text_embedding import long_text_embedding
+from lotc.nn.logistic_regression import LogisticRegression
+from lotc.trainer.base_trainer import BaseTrainer
 
-logger = logging.getLogger('ltc.trainer')
+logger = logging.getLogger('lotc.trainer')
 
 
 class FileBinaryClassifierTrainer(BaseTrainer):

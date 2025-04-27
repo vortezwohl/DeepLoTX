@@ -4,9 +4,9 @@ from concurrent.futures import ThreadPoolExecutor
 import torch
 from sentence_transformers import SentenceTransformer
 
-from ltc import __ROOT__
+from lotc import __ROOT__
 
-logger = logging.getLogger('ltc.embedding')
+logger = logging.getLogger('lotc.embedding')
 
 
 def long_text_embedding(text: str, max_length: int,
