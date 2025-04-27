@@ -865,7 +865,7 @@ wheels = [
 ]
 
 [[package]]
-name = "ltc-longtextclassifier"
+name = "lotc"
 version = "0.1.0"
 source = { virtual = "." }
 dependencies = [

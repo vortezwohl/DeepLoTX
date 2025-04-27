@@ -26,7 +26,7 @@ class FileBinaryClassifierTrainer(BaseTrainer):
         self._chunk_size = chunk_size
 
     @override
-    def train(self, positive_file_path: str, negative_file_path: str) -> LogisticRegression:
+    def train(self, positive_file_path: str, negative_file_path: str, model: LogisticRegression | None = None) -> LogisticRegression:
         pos_files = get_files(positive_file_path)
         neg_files = get_files(negative_file_path)
         min_length = min(len(pos_files), len(neg_files))
@@ -46,7 +46,11 @@ class FileBinaryClassifierTrainer(BaseTrainer):
         valid_dataset = TensorDataset(inputs[train_size:], labels[train_size:])
         train_loader = DataLoader(train_dataset, batch_size=self._batch_size, shuffle=True)
         valid_loader = DataLoader(valid_dataset, batch_size=self._batch_size, shuffle=True)
-        model = LogisticRegression(input_dim=feature_dim, train=True)
+        if model is not None and model.fc1.in_features != feature_dim:
+            logger.warning("The dimension of features doesn't match. A new model instance will be created.")
+            model = None
+        if model is None:
+            model = LogisticRegression(input_dim=feature_dim, train=True)
         loss_function = nn.BCELoss()
         optimizer = optim.Adam(model.parameters(), lr=self._learning_rate)
         for epoch in range(self._num_epochs):
