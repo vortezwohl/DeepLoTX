@@ -16,16 +16,17 @@ logger = logging.getLogger('lotc.trainer')
 class FileBinaryClassifierTrainer(BaseTrainer):
     def __init__(self, model_name: str, max_length: int, num_epochs: int,
                  learning_rate: float = 2e-5, batch_size: int = 2,
-                 chunk_size: int = 256, train_ratio: float = 0.8):
+                 chunk_size: int = 256, train_ratio: float = 0.8,
+                 train_loss_threshold: float = 0.0, valid_loss_threshold: float = 0.0):
         super().__init__(model_name=model_name, num_epochs=num_epochs,
                          learning_rate=learning_rate, batch_size=batch_size,
-                         train_ratio=train_ratio)
+                         train_ratio=train_ratio, train_loss_threshold=train_loss_threshold,
+                         valid_loss_threshold=valid_loss_threshold)
         self._max_length = max_length
         self._chunk_size = chunk_size
 
     @override
-    def train(self, positive_file_path: str, negative_file_path: str,
-              train_loss_threshold: float = 0.0, valid_loss_threshold: float = 0.0) -> LogisticRegression:
+    def train(self, positive_file_path: str, negative_file_path: str) -> LogisticRegression:
         pos_files = get_files(positive_file_path)
         neg_files = get_files(negative_file_path)
         min_length = min(len(pos_files), len(neg_files))
@@ -70,9 +71,9 @@ class FileBinaryClassifierTrainer(BaseTrainer):
                 logger.debug(f"Epoch {epoch + 1}/{self._num_epochs} | "
                              f"Train Loss: {total_loss:.4f} | "
                              f"Valid Loss: {total_valid_loss:.4f}")
-                if total_valid_loss < valid_loss_threshold:
+                if total_valid_loss < self._valid_loss_threshold:
                     break
             logger.debug(f"Epoch {epoch + 1}/{self._num_epochs} | Train Loss: {total_loss:.4f}")
-            if total_loss < train_loss_threshold:
+            if total_loss < self._train_loss_threshold:
                 break
         return model
