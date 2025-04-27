@@ -1,0 +1,12 @@
+[project]
+name = "ltc-longtextclassifier"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "numpy>=2.2.5",
+    "python-dotenv>=1.1.0",
+    "sentence-transformers>=4.1.0",
+    "torch>=2.7.0",
+]
