@@ -1,3 +1,4 @@
+import logging
 from typing_extensions import override
 
 import torch
@@ -8,6 +9,8 @@ from ltc.util.read_file import get_files, read_file
 from ltc.embedding.long_text_embedding import long_text_embedding
 from ltc.nn.logistic_regression import LogisticRegression
 from ltc.trainer.base_trainer import BaseTrainer
+
+logger = logging.getLogger('ltc.trainer')
 
 
 class FileBinaryClassifierTrainer(BaseTrainer):
@@ -64,13 +67,12 @@ class FileBinaryClassifierTrainer(BaseTrainer):
                         loss = loss_function(outputs, batch_labels)
                         total_valid_loss += loss.item()
                         model._train = True
-                print(f"[{FileBinaryClassifierTrainer.__name__}]Epoch {epoch + 1}/{self._num_epochs}|"
-                      f"Train Loss: {total_loss:.4f}|"
-                      f"Valid Loss: {total_valid_loss:.4f}")
+                logger.debug(f"Epoch {epoch + 1}/{self._num_epochs} | "
+                             f"Train Loss: {total_loss:.4f} | "
+                             f"Valid Loss: {total_valid_loss:.4f}")
                 if total_valid_loss < valid_loss_threshold:
                     break
-            print(f"[{FileBinaryClassifierTrainer.__name__}]Epoch {epoch + 1}/{self._num_epochs}|"
-                  f"Train Loss: {total_loss:.4f}")
+            logger.debug(f"Epoch {epoch + 1}/{self._num_epochs} | Train Loss: {total_loss:.4f}")
             if total_loss < train_loss_threshold:
                 break
         return model
