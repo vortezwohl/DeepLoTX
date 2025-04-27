@@ -12,10 +12,13 @@ logger = logging.getLogger('lotc.embedding')
 
 
 def long_text_embedding(text: str, max_length: int,
-                        chunk_size: int = 128, bert_model_name_or_path: str = 'moka-ai/m3e-small') -> tuple[int, torch.Tensor]:
+                        chunk_size: int = 128,
+                        bert_model_name_or_path: str = 'moka-ai/m3e-small') -> tuple[int, torch.Tensor]:
     def chunk_embedding(input_tup: tuple[int, str]) -> tuple[int, torch.Tensor]:
         return input_tup[0], bert_model.encode(input_tup[1])
 
+    _text_to_show = text.replace("\n", str())
+    logger.debug(f'Embedding text \"{_text_to_show if len(_text_to_show) < 128 else _text_to_show[:128] + "..."}\".')
     # read cache
     _text_hash = md5(text)
     if _text_hash in CACHE.keys():
@@ -25,8 +28,6 @@ def long_text_embedding(text: str, max_length: int,
                 and _text_cache_dict.get('bert_model_name_or_path') == bert_model_name_or_path):
             if 'result' in _text_cache_dict.keys():
                 return _text_cache_dict.get('result')
-    _text_to_show = text.replace("\n", str())
-    logger.debug(f'Embedding text \"{_text_to_show if len(_text_to_show) < 128 else _text_to_show[:128] + "..."}\".')
     bert_model = SentenceTransformer(
         model_name_or_path=bert_model_name_or_path,
         cache_folder=f'{__ROOT__}\\.cache'
