@@ -1,3 +1,5 @@
+from concurrent.futures import ThreadPoolExecutor
+
 import torch
 from torch import nn
 from transformers import BertTokenizer, BertModel
@@ -17,12 +19,22 @@ class BertEncoder(nn.Module):
                                               cache_dir=CACHE_PATH)
 
     def forward(self, input_ids) -> torch.Tensor:
+        ori_mode = self.bert.training
         self.bert.eval()
+        num_chunks = (input_ids.shape[-1] + 511) // 512
+        chunks = chunk_results = []
+        for i in range(num_chunks):
+            start_idx = i * 512
+            end_idx = min(start_idx + 512, input_ids.shape[1])
+            chunks.append(input_ids[:, start_idx: end_idx])
         with torch.no_grad():
-            res = self.bert.forward(input_ids)
-        return res
+            with ThreadPoolExecutor(max_workers=4) as e:
+                chunk_results = [x.last_hidden_state[:, 0, :]
+                                 for x in list(e.map(self.bert.forward, chunks))]
+        self.bert.train(mode=ori_mode)
+        return torch.mean(torch.stack(chunk_results), dim=0)
 
     # noinspection PyUnresolvedReferences
     def encode(self, text: str) -> torch.Tensor:
         _input_ids = self.tokenizer.encode(text, return_tensors='pt')
-        return self.forward(_input_ids).last_hidden_state[:, 0, :].squeeze()
+        return self.forward(_input_ids).squeeze()
