@@ -5,6 +5,7 @@ import torch
 from torch import nn, optim
 from torch.utils.data import DataLoader, TensorDataset
 
+from lotc import TORCH_DEVICE
 from lotc.util.read_file import get_files, read_file
 from lotc.embedding.long_text_embedding import long_text_embedding
 from lotc.nn.logistic_regression import LogisticRegression
@@ -51,6 +52,7 @@ class FileBinaryClassifierTrainer(BaseTrainer):
             self.model = None
         if self.model is None:
             self.model = LogisticRegression(input_dim=feature_dim, train=True)
+        self.model.to(TORCH_DEVICE)
         loss_function = nn.BCELoss()
         optimizer = optim.Adam(self.model.parameters(), lr=self._learning_rate)
         for epoch in range(self._num_epochs):
@@ -67,11 +69,11 @@ class FileBinaryClassifierTrainer(BaseTrainer):
                 total_valid_loss = 0.0
                 for batch_texts, batch_labels in valid_loader:
                     with torch.no_grad():
-                        self.model._train = False
+                        self.model.eval()
                         outputs = self.model(batch_texts)
                         loss = loss_function(outputs, batch_labels)
                         total_valid_loss += loss.item()
-                        self.model._train = True
+                        self.model.train()
                 logger.debug(f"Epoch {epoch + 1}/{self._num_epochs} | "
                              f"Train Loss: {total_loss:.4f} | "
                              f"Valid Loss: {total_valid_loss:.4f}")

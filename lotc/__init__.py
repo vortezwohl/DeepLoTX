@@ -1,6 +1,9 @@
 import logging
 import os
 
+import torch
+
+TORCH_DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 __ROOT__ = os.path.dirname(os.path.abspath(__file__))
 
 logger = logging.getLogger('lotc')
