@@ -24,6 +24,7 @@ def long_text_encoder(text: str, max_length: int,
         _text_cache_dict = CACHE[_text_hash]
         if (_text_cache_dict.get('max_length') == max_length
                 and _text_cache_dict.get('chunk_size') == chunk_size
+                and _text_cache_dict.get('overlapping') == overlapping
                 and _text_cache_dict.get('bert_model_name_or_path') == bert_model_name_or_path):
             if 'result' in _text_cache_dict.keys():
                 return _text_cache_dict.get('result')
@@ -50,6 +51,7 @@ def long_text_encoder(text: str, max_length: int,
     CACHE[_text_hash] = {
         'max_length': max_length,
         'chunk_size': chunk_size,
+        'overlapping': overlapping,
         'bert_model_name_or_path': bert_model_name_or_path,
         'result': result
     }
