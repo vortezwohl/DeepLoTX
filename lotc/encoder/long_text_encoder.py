@@ -2,18 +2,17 @@ import logging
 from concurrent.futures import ThreadPoolExecutor
 
 import torch
-from sentence_transformers import SentenceTransformer
 
-from lotc import __ROOT__
+from lotc.encoder.bert_encoder import BertEncoder, DEFAULT_BERT
 from lotc.util.hash import md5
 
 CACHE = dict()
 logger = logging.getLogger('lotc.embedding')
 
 
-def long_text_embedding(text: str, max_length: int,
-                        chunk_size: int = 256,
-                        bert_model_name_or_path: str = 'moka-ai/m3e-small') -> tuple[int, torch.Tensor]:
+def long_text_encoder(text: str, max_length: int,
+                      chunk_size: int = 256,
+                      bert_model_name_or_path: str = DEFAULT_BERT) -> tuple[int, torch.Tensor]:
     def chunk_embedding(input_tup: tuple[int, str]) -> tuple[int, torch.Tensor]:
         return input_tup[0], bert_model.encode(input_tup[1])
 
@@ -28,10 +27,7 @@ def long_text_embedding(text: str, max_length: int,
                 and _text_cache_dict.get('bert_model_name_or_path') == bert_model_name_or_path):
             if 'result' in _text_cache_dict.keys():
                 return _text_cache_dict.get('result')
-    bert_model = SentenceTransformer(
-        model_name_or_path=bert_model_name_or_path,
-        cache_folder=f'{__ROOT__}\\.cache'
-    )
+    bert_model = BertEncoder(model_name_or_path=bert_model_name_or_path)
     _text = text.strip()
     if len(_text) < max_length:
         _text += '.' * (max_length - len(_text))

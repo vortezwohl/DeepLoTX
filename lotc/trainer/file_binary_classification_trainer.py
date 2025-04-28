@@ -5,7 +5,7 @@ import torch
 from torch import nn, optim
 from torch.utils.data import DataLoader, TensorDataset
 
-from lotc.embedding.long_text_embedding import long_text_embedding
+from lotc.encoder.long_text_encoder import long_text_encoder
 from lotc.nn.logistic_regression import LogisticRegression
 from lotc.trainer.base_trainer import BaseTrainer
 
@@ -29,7 +29,7 @@ class FileBinaryClassifierTrainer(BaseTrainer):
         all_texts = positive_texts + negative_texts
         labels = ([torch.tensor([1.0], dtype=torch.float32) for _ in range(len(positive_texts))]
                   + [torch.tensor([0.0], dtype=torch.float32) for _ in range(len(negative_texts))])
-        text_embeddings = [long_text_embedding(x, max_length=self._max_length, chunk_size=self._chunk_size)
+        text_embeddings = [long_text_encoder(x, max_length=self._max_length, chunk_size=self._chunk_size)
                            for x in all_texts]
         feature_dim = text_embeddings[0][0]
         inputs = torch.stack([x[1] for x in text_embeddings])

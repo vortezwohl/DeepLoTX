@@ -5,10 +5,11 @@ from transformers import BertTokenizer, BertModel
 from lotc import __ROOT__
 
 CACHE_PATH = f'{__ROOT__}\\.cache'
+DEFAULT_BERT = 'bert-base-uncased'
 
 
 class BertEncoder(nn.Module):
-    def __init__(self, model_name_or_path='bert-base-uncased'):
+    def __init__(self, model_name_or_path: str = DEFAULT_BERT):
         super().__init__()
         self.tokenizer = BertTokenizer.from_pretrained(pretrained_model_name_or_path=model_name_or_path,
                                                        cache_dir=CACHE_PATH)

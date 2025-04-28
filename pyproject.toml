@@ -9,7 +9,6 @@ dependencies = [
     "jupyter>=1.1.1",
     "numpy>=2.2.5",
     "python-dotenv>=1.1.0",
-    "sentence-transformers>=4.1.0",
     "torch>=2.7.0",
     "transformers>=4.51.3",
     "typing-extensions>=4.13.2",
