@@ -878,6 +878,7 @@ dependencies = [
     { name = "python-dotenv" },
     { name = "sentence-transformers" },
     { name = "torch" },
+    { name = "transformers" },
     { name = "typing-extensions" },
 ]
 
@@ -888,6 +889,7 @@ requires-dist = [
     { name = "python-dotenv", specifier = ">=1.1.0" },
     { name = "sentence-transformers", specifier = ">=4.1.0" },
     { name = "torch", specifier = ">=2.7.0" },
+    { name = "transformers", specifier = ">=4.51.3" },
     { name = "typing-extensions", specifier = ">=4.13.2" },
 ]
 
