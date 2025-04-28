@@ -19,11 +19,11 @@ class LongTextEncoder(BertEncoder):
         self._overlapping = overlapping
         self._cache = dict()
 
+    def __chunk_embedding(self, input_tup: tuple[int, str]) -> tuple[int, torch.Tensor]:
+        return input_tup[0], super().encode(input_tup[1])
+
     @override
     def encode(self, text: str) -> torch.Tensor:
-        def chunk_embedding(input_tup: tuple[int, str]) -> tuple[int, torch.Tensor]:
-            return input_tup[0], super().encode(input_tup[1])
-
         _text_to_show = text.replace("\n", str())
         logger.debug(f'Embedding \"{_text_to_show if len(_text_to_show) < 128 else _text_to_show[:128] + "..."}\".')
         # read cache
@@ -41,7 +41,7 @@ class LongTextEncoder(BertEncoder):
             _tmp_right = (i + 1) * self._chunk_size + self._overlapping
             chunks.append((i, _text[_tmp_left: _tmp_right]))
         with ThreadPoolExecutor(max_workers=min(num_chunks + 1, 16)) as executor:
-            embeddings = list(executor.map(chunk_embedding, chunks))
+            embeddings = list(executor.map(self.__chunk_embedding, chunks))
         embeddings.sort(key=lambda x: x[0])
         fin_embedding = [x[1] for x in embeddings]
         fin_emb_tensor = torch.tensor([], dtype=torch.float32)
