@@ -3,8 +3,7 @@ import os
 
 __ROOT__ = os.path.dirname(os.path.abspath(__file__))
 
-from .encoder import BertEncoder
-from .encoder import long_text_encoder
+from .encoder import BertEncoder, LongTextEncoder
 from .nn import LinearRegression, LogisticRegression, SoftmaxRegression
 from .trainer import FileBinaryClassifierTrainer
 

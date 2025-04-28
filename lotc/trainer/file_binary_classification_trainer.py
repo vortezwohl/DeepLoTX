@@ -5,7 +5,7 @@ import torch
 from torch import nn, optim
 from torch.utils.data import DataLoader, TensorDataset
 
-from lotc.encoder.long_text_encoder import long_text_encoder
+from lotc.encoder.long_text_encoder import LongTextEncoder
 from lotc.nn.logistic_regression import LogisticRegression
 from lotc.trainer.base_trainer import BaseTrainer
 
@@ -13,12 +13,9 @@ logger = logging.getLogger('lotc.trainer')
 
 
 class FileBinaryClassifierTrainer(BaseTrainer):
-    def __init__(self, max_length: int, chunk_size: int = 256,
-                 overlapping: int = 64, batch_size: int = 2, train_ratio: float = 0.8):
+    def __init__(self, long_text_encoder: LongTextEncoder, batch_size: int = 2, train_ratio: float = 0.8):
         super().__init__(batch_size=batch_size, train_ratio=train_ratio)
-        self._max_length = max_length
-        self._overlapping = overlapping
-        self._chunk_size = chunk_size
+        self._long_text_encoder = long_text_encoder
 
     @override
     def train(self, positive_texts: list[str], negative_texts: list[str],
@@ -30,10 +27,8 @@ class FileBinaryClassifierTrainer(BaseTrainer):
         all_texts = positive_texts + negative_texts
         labels = ([torch.tensor([1.0], dtype=torch.float32) for _ in range(len(positive_texts))]
                   + [torch.tensor([0.0], dtype=torch.float32) for _ in range(len(negative_texts))])
-        text_embeddings = [long_text_encoder(x, max_length=self._max_length,
-                                             chunk_size=self._chunk_size, overlapping=self._overlapping)
-                           for x in all_texts]
-        feature_dim = text_embeddings[0][0]
+        text_embeddings = [self._long_text_encoder.encode(x) for x in all_texts]
+        feature_dim = text_embeddings[0].shape[-1]
         inputs = torch.stack([x[1] for x in text_embeddings])
         labels = torch.stack(labels)
         dataset_size = len(labels)
