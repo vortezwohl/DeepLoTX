@@ -6,20 +6,20 @@ class LinearRegression(nn.Module):
     def __init__(self, input_dim: int, output_dim: int, train: bool = False):
         super().__init__()
         self._train = train
-        self.fc1 = nn.Linear(input_dim, 512)
-        self.fc1_to_fc4_res = nn.Linear(512, 32)
-        self.fc2 = nn.Linear(512, 128)
-        self.fc3 = nn.Linear(128, 64)
-        self.fc4 = nn.Linear(64, 32)
-        self.fc5 = nn.Linear(32, output_dim)
+        self.fc1 = nn.Linear(input_dim, 1024)
+        self.fc1_to_fc4_res = nn.Linear(1024, 64)
+        self.fc2 = nn.Linear(1024, 768)
+        self.fc3 = nn.Linear(768, 128)
+        self.fc4 = nn.Linear(128, 64)
+        self.fc5 = nn.Linear(64, output_dim)
         self.leaky_relu = nn.LeakyReLU(negative_slope=0.05)
 
     def forward(self, x) -> torch.Tensor:
         fc1_out = self.leaky_relu(self.fc1(x))
-        x = nn.LayerNorm(normalized_shape=512, eps=1e-9)(fc1_out)
+        x = nn.LayerNorm(normalized_shape=1024, eps=1e-9)(fc1_out)
         x = torch.dropout(x, p=0.2, train=self._train)
         x = self.leaky_relu(self.fc2(x))
-        x = nn.LayerNorm(normalized_shape=128, eps=1e-9)(x)
+        x = nn.LayerNorm(normalized_shape=768, eps=1e-9)(x)
         x = torch.dropout(x, p=0.2, train=self._train)
         x = self.leaky_relu(self.fc3(x))
         x = torch.dropout(x, p=0.2, train=self._train)
