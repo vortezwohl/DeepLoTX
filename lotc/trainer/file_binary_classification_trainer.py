@@ -50,7 +50,7 @@ class FileBinaryClassifierTrainer(BaseTrainer):
             logger.warning("The dimension of features doesn't match. A new model instance will be created.")
             self.model = None
         if self.model is None:
-            self.model = LogisticRegression(input_dim=feature_dim)
+            self.model = LogisticRegression(input_dim=feature_dim, output_dim=1)
         loss_function = nn.BCELoss()
         optimizer = optim.Adam(self.model.parameters(), lr=self._learning_rate)
         for epoch in range(self._num_epochs):
