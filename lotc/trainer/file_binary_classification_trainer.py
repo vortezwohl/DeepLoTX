@@ -29,7 +29,7 @@ class FileBinaryClassifierTrainer(BaseTrainer):
                   + [torch.tensor([0.0], dtype=torch.float32) for _ in range(len(negative_texts))])
         text_embeddings = [self._long_text_encoder.encode(x) for x in all_texts]
         feature_dim = text_embeddings[0].shape[-1]
-        inputs = torch.stack([x[1] for x in text_embeddings])
+        inputs = torch.stack(text_embeddings)
         labels = torch.stack(labels)
         dataset_size = len(labels)
         train_size = int(self._train_ratio * dataset_size)

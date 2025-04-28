@@ -37,4 +37,4 @@ class BertEncoder(nn.Module):
     # noinspection PyUnresolvedReferences
     def encode(self, text: str) -> torch.Tensor:
         _input_ids = self.tokenizer.encode(text, return_tensors='pt')
-        return self.forward(_input_ids)
+        return self.forward(_input_ids).squeeze()

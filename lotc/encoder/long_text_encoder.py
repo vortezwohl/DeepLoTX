@@ -46,7 +46,7 @@ class LongTextEncoder(BertEncoder):
         fin_embedding = [x[1] for x in embeddings]
         fin_emb_tensor = torch.tensor([], dtype=torch.float32)
         for emb in fin_embedding:
-            fin_emb_tensor = torch.cat((fin_emb_tensor.detach().clone(), emb.detach().clone()), dim=0)
+            fin_emb_tensor = torch.cat((fin_emb_tensor.detach().clone(), emb.detach().clone()), dim=-1)
         # write cache
         self._cache[_text_hash] = fin_emb_tensor
         return fin_emb_tensor
