@@ -1,5 +1,3 @@
-from typing_extensions import override
-
 import torch
 from torch import nn
 
