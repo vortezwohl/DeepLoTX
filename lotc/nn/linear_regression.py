@@ -1,8 +1,12 @@
+from typing_extensions import override
+
 import torch
 from torch import nn
 
+from lotc.nn.base_neural_network import BaseNeuralNetwork
 
-class LinearRegression(nn.Module):
+
+class LinearRegression(BaseNeuralNetwork):
     def __init__(self, input_dim: int, output_dim: int):
         super().__init__()
         self.fc1 = nn.Linear(input_dim, 1024)
@@ -13,6 +17,7 @@ class LinearRegression(nn.Module):
         self.fc5 = nn.Linear(64, output_dim)
         self.leaky_relu = nn.LeakyReLU(negative_slope=0.05)
 
+    @override
     def forward(self, x) -> torch.Tensor:
         fc1_out = self.leaky_relu(self.fc1(x))
         x = nn.LayerNorm(normalized_shape=1024, eps=1e-9)(fc1_out)
@@ -25,11 +30,3 @@ class LinearRegression(nn.Module):
         x = self.leaky_relu(self.fc4(x)) + self.fc1_to_fc4_res(fc1_out)
         x = self.fc5(x)
         return x
-
-    def predict(self, x) -> torch.Tensor:
-        __train = self.training
-        self.training = False
-        with torch.no_grad():
-            res = self.forward(x)
-        self.training = __train
-        return res
