@@ -5,13 +5,13 @@
 - Install with pip
 
     ```
-    pip install git+https://github.com/vortezwohl/LOTC-Easy2UseLongTextClassifierTrainers.git
+    pip install git+https://github.com/vortezwohl/LoTC.git
     ```
 
 - Install with uv
 
     ```
-    uv add git+https://github.com/vortezwohl/LOTC-Easy2UseLongTextClassifierTrainers.git
+    uv add git+https://github.com/vortezwohl/LoTC.git
     ```
 
 ## Quick Start
