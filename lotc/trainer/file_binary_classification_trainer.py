@@ -26,11 +26,11 @@ class FileBinaryClassifierTrainer(BaseTrainer):
         min_length = min(len(positive_texts), len(negative_texts))
         positive_texts = positive_texts[:min_length]
         negative_texts = negative_texts[:min_length]
-        file_contents = positive_texts + negative_texts
+        all_texts = positive_texts + negative_texts
         labels = ([torch.tensor([1.0], dtype=torch.float32) for _ in range(len(positive_texts))]
                   + [torch.tensor([0.0], dtype=torch.float32) for _ in range(len(negative_texts))])
         text_embeddings = [long_text_embedding(x, max_length=self._max_length, chunk_size=self._chunk_size)
-                           for x in file_contents]
+                           for x in all_texts]
         feature_dim = text_embeddings[0][0]
         inputs = torch.stack([x[1] for x in text_embeddings])
         labels = torch.stack(labels)
