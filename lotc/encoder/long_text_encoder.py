@@ -35,7 +35,7 @@ def long_text_encoder(text: str, max_length: int,
     chunks = []
     for i in range(num_chunks):
         chunks.append((i, _text[i * chunk_size: (i + 1) * chunk_size]))
-    with ThreadPoolExecutor(max_workers=min(num_chunks + 1, 8)) as executor:
+    with ThreadPoolExecutor(max_workers=min(num_chunks + 1, 16)) as executor:
         embeddings = list(executor.map(chunk_embedding, chunks))
     embeddings.sort(key=lambda x: x[0])
     fin_embedding = [x[1] for x in embeddings]
