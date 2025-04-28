@@ -32,11 +32,11 @@ trainer = FileBinaryClassifierTrainer(
 
 pos_data_path = './data/pos'
 neg_data_path = './data/neg'
-pos_data = [read_file(x) for x in get_files(pos_data_path)]
-neg_data = [read_file(x) for x in get_files(neg_data_path)]
+pos_data = [read_file(x) for x in get_files(pos_data_path)[:2]]
+neg_data = [read_file(x) for x in get_files(neg_data_path)[:2]]
 model = trainer.train(pos_data, neg_data, num_epochs=20, learning_rate=2e-5)
 model.save()
 
 model = model.load()
-model.predict(long_text_embedding('这是一个测试文本.', max_length=4096, chunk_size=256)[1])
+model.predict(long_text_embedding('这是一个测试文本.', max_length=1024, chunk_size=256)[1])
 ```
