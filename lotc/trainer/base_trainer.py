@@ -1,7 +1,6 @@
 from abc import abstractmethod
 
 import torch
-from torch import nn
 
 
 class BaseTrainer(object):

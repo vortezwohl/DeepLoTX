@@ -5,7 +5,6 @@ import torch
 from torch import nn, optim
 from torch.utils.data import DataLoader, TensorDataset
 
-from lotc import TORCH_DEVICE
 from lotc.util.read_file import get_files, read_file
 from lotc.embedding.long_text_embedding import long_text_embedding
 from lotc.nn.logistic_regression import LogisticRegression
@@ -52,7 +51,6 @@ class FileBinaryClassifierTrainer(BaseTrainer):
             self.model = None
         if self.model is None:
             self.model = LogisticRegression(input_dim=feature_dim)
-        self.model.to(TORCH_DEVICE)
         loss_function = nn.BCELoss()
         optimizer = optim.Adam(self.model.parameters(), lr=self._learning_rate)
         for epoch in range(self._num_epochs):
