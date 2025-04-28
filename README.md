@@ -20,15 +20,20 @@ To train a binary classifier for text files:
 
 ```python
 from lotc.trainer import FileBinaryClassifierTrainer
+from lotc.embedding import long_text_embedding
 
-pos = 'path/to/positives'
-neg = 'path/to/negatives'
+pos_data = 'path/to/positives'
+neg_data = 'path/to/negatives'
 trainer = FileBinaryClassifierTrainer(
-    model_name='FileBinaryClassifier_1',
+    model_name='example-model',
     max_length=4096,
-    num_epochs=10,
-    train_loss_threshold=20.0
+    num_epochs=20,
+    train_loss_threshold=4
 )
-model = trainer.train(pos, neg)
-trainer.save(model)
+
+trainer.train(pos_data, neg_data)
+trainer.save()
+
+model = trainer.load()
+model.predict(long_text_embedding('这是一个测试文本.', max_length=4096, chunk_size=256)[1])
 ```
