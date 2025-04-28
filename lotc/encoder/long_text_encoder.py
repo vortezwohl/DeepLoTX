@@ -44,8 +44,7 @@ def long_text_encoder(text: str, max_length: int,
     fin_embedding = [x[1] for x in embeddings]
     fin_emb_tensor = torch.tensor([], dtype=torch.float32)
     for emb in fin_embedding:
-        fin_emb_tensor = torch.cat((fin_emb_tensor.detach().clone(),
-                                    torch.tensor(emb.detach().clone(), dtype=torch.float32)), dim=0)
+        fin_emb_tensor = torch.cat((fin_emb_tensor.detach().clone(), emb.detach().clone()), dim=0)
     result = fin_emb_tensor.shape[-1], fin_emb_tensor
     # write cache
     CACHE[_text_hash] = {
