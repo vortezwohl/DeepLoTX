@@ -1,3 +1,4 @@
+import math
 import torch
 from torch import nn
 from transformers import BertTokenizer, BertModel
@@ -20,7 +21,7 @@ class BertEncoder(nn.Module):
         def _encoder(_input_tup: tuple[torch.Tensor, torch.Tensor]) -> torch.Tensor:
             return self.bert.forward(_input_tup[0], attention_mask=_input_tup[1]).last_hidden_state[:, 0, :]
 
-        num_chunks = (input_ids.shape[-1] + 511) // 512
+        num_chunks = math.ceil(input_ids.shape[-1] / 512)
         chunks = chunk_results = []
         for i in range(num_chunks):
             start_idx = i * 512
@@ -35,6 +36,6 @@ class BertEncoder(nn.Module):
 
     # noinspection PyUnresolvedReferences
     def encode(self, text: str) -> torch.Tensor:
-        _input_ids = self.tokenizer.encode([text], return_tensors='pt')
+        _input_ids = torch.tensor([self.tokenizer.encode(text)], dtype=torch.long)
         _att_mask = torch.tensor([[1] * _input_ids.shape[-1]], dtype=torch.int)
         return self.forward(_input_ids, _att_mask).squeeze()
