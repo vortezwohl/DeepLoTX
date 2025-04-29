@@ -18,23 +18,26 @@ class BertEncoder(nn.Module):
         self.bert = BertModel.from_pretrained(pretrained_model_name_or_path=model_name_or_path,
                                               cache_dir=CACHE_PATH)
 
-    def forward(self, input_ids) -> torch.Tensor:
+    def forward(self, input_ids, attention_mask: torch.Tensor) -> torch.Tensor:
+        def _encoder(_input_tup: tuple[torch.Tensor, torch.Tensor]) -> torch.Tensor:
+            return self.bert.forward(_input_tup[0], attention_mask=_input_tup[1]).last_hidden_state[:, 0, :]
+
         ori_mode = self.bert.training
         self.bert.eval()
         num_chunks = (input_ids.shape[-1] + 511) // 512
         chunks = chunk_results = []
         for i in range(num_chunks):
             start_idx = i * 512
-            end_idx = min(start_idx + 512, input_ids.shape[1])
-            chunks.append(input_ids[:, start_idx: end_idx])
+            end_idx = min(start_idx + 512, input_ids.shape[-1])
+            chunks.append((input_ids[:, start_idx: end_idx], attention_mask[:, start_idx: end_idx]))
         with torch.no_grad():
-            with ThreadPoolExecutor(max_workers=4) as e:
-                chunk_results = [x.last_hidden_state[:, 0, :]
-                                 for x in list(e.map(self.bert.forward, chunks))]
+            with ThreadPoolExecutor(max_workers=2) as e:
+                chunk_results = list(e.map(_encoder, chunks))
         self.bert.train(mode=ori_mode)
-        return torch.mean(torch.stack(chunk_results), dim=0)
+        return torch.sum(torch.stack(chunk_results, dim=0), dim=0)
 
     # noinspection PyUnresolvedReferences
     def encode(self, text: str) -> torch.Tensor:
-        _input_ids = self.tokenizer.encode(text, return_tensors='pt')
-        return self.forward(_input_ids).squeeze()
+        _input_ids = self.tokenizer.encode([text], return_tensors='pt')
+        _att_mask = torch.tensor([[1] * _input_ids.shape[-1]], dtype=torch.int)
+        return self.forward(_input_ids, _att_mask).squeeze()
