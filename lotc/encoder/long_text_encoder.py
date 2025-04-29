@@ -31,8 +31,7 @@ class LongTextEncoder(BertEncoder):
         _text_hash = md5(text)
         if _text_hash in self._cache.keys():
             return self._cache[_text_hash]
-        _text = text.strip()
-        _text_to_input_ids = self.tokenizer.encode(_text)[:self._max_length]
+        _text_to_input_ids = self.tokenizer.encode(text.strip())[:self._max_length]
         _text_to_input_ids_att_mask = []
         # padding
         pad_token = self.tokenizer.pad_token_type_id
@@ -50,7 +49,7 @@ class LongTextEncoder(BertEncoder):
             _tmp_right = (i + 1) * self._chunk_size + self._overlapping
             chunks.append((i, torch.tensor([_text_to_input_ids[_tmp_left: _tmp_right]], dtype=torch.long),
                            torch.tensor([_text_to_input_ids_att_mask[_tmp_left: _tmp_right]], dtype=torch.int)))
-        with ThreadPoolExecutor(max_workers=min(num_chunks + 1, 6)) as executor:
+        with ThreadPoolExecutor(max_workers=min(num_chunks + 1, 3)) as executor:
             embeddings = list(executor.map(self.__chunk_embedding, chunks))
         embeddings.sort(key=lambda x: x[0])
         fin_embedding = [x[1] for x in embeddings]
