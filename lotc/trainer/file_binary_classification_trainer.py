@@ -19,11 +19,12 @@ class FileBinaryClassifierTrainer(BaseTrainer):
 
     @override
     def train(self, positive_texts: list[str], negative_texts: list[str],
-              num_epochs: int, learning_rate: float = 2e-5,
+              num_epochs: int, learning_rate: float = 2e-5, balancing_dataset: bool = True,
               train_loss_threshold: float = 0.0, valid_loss_threshold: float = 0.0) -> LogisticRegression:
-        min_length = min(len(positive_texts), len(negative_texts))
-        positive_texts = positive_texts[:min_length]
-        negative_texts = negative_texts[:min_length]
+        if balancing_dataset:
+            min_length = min(len(positive_texts), len(negative_texts))
+            positive_texts = positive_texts[:min_length]
+            negative_texts = negative_texts[:min_length]
         all_texts = positive_texts + negative_texts
         labels = ([torch.tensor([1.0], dtype=torch.float32) for _ in range(len(positive_texts))]
                   + [torch.tensor([0.0], dtype=torch.float32) for _ in range(len(negative_texts))])
@@ -48,7 +49,7 @@ class FileBinaryClassifierTrainer(BaseTrainer):
             self.model.train()
             total_loss = 0.0
             for batch_texts, batch_labels in train_loader:
-                outputs = self.model(batch_texts)
+                outputs = self.model.forward(batch_texts)
                 loss = loss_function(outputs, batch_labels)
                 optimizer.zero_grad()
                 loss.backward()
@@ -59,7 +60,7 @@ class FileBinaryClassifierTrainer(BaseTrainer):
                 for batch_texts, batch_labels in valid_loader:
                     with torch.no_grad():
                         self.model.eval()
-                        outputs = self.model(batch_texts)
+                        outputs = self.model.forward(batch_texts)
                         loss = loss_function(outputs, batch_labels)
                         total_valid_loss += loss.item()
                         self.model.train()
