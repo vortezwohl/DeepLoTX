@@ -7,8 +7,8 @@ from lotc.nn.base_neural_network import BaseNeuralNetwork
 
 
 class LinearRegression(BaseNeuralNetwork):
-    def __init__(self, input_dim: int, output_dim: int):
-        super().__init__()
+    def __init__(self, input_dim: int, output_dim: int, model_name: str | None = None):
+        super().__init__(model_name=model_name)
         self.fc1 = nn.Linear(input_dim, 1024)
         self.fc1_to_fc4_res = nn.Linear(1024, 64)
         self.fc2 = nn.Linear(1024, 768)
