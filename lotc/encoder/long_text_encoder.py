@@ -40,7 +40,7 @@ class LongTextEncoder(BertEncoder):
             _tmp_left = max(i * self._chunk_size - self._overlapping, 0)
             _tmp_right = (i + 1) * self._chunk_size + self._overlapping
             chunks.append((i, _text[_tmp_left: _tmp_right]))
-        with ThreadPoolExecutor(max_workers=min(num_chunks + 1, 16)) as executor:
+        with ThreadPoolExecutor(max_workers=min(num_chunks + 1, 6)) as executor:
             embeddings = list(executor.map(self.__chunk_embedding, chunks))
         embeddings.sort(key=lambda x: x[0])
         fin_embedding = [x[1] for x in embeddings]
