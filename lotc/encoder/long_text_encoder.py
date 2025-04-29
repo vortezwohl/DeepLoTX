@@ -32,7 +32,8 @@ class LongTextEncoder(BertEncoder):
             return self._cache[_text_hash]
         _text = text.strip()
         if len(_text) < self._max_length:
-            _text += '.' * (self._max_length - len(_text))
+            pad_token = self.tokenizer.decode(self.tokenizer.pad_token_type_id)
+            _text += pad_token * (self._max_length - len(_text))
         num_chunks = max(int(self._max_length / self._chunk_size), 1)
         # split chunks
         chunks = []
