@@ -34,7 +34,6 @@ class BertEncoder(nn.Module):
         self.bert.train(mode=ori_mode)
         return torch.cat(chunk_results, dim=-1)
 
-    # noinspection PyUnresolvedReferences
     def encode(self, text: str) -> torch.Tensor:
         _input_ids = torch.tensor([self.tokenizer.encode(text)], dtype=torch.long)
         _att_mask = torch.tensor([[1] * _input_ids.shape[-1]], dtype=torch.int)

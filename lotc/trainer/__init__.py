@@ -1,1 +1,1 @@
-from .file_binary_classification_trainer import FileBinaryClassifierTrainer
+from .text_binary_classification_trainer import TextBinaryClassifierTrainer

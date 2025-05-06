@@ -5,7 +5,7 @@ __ROOT__ = os.path.dirname(os.path.abspath(__file__))
 
 from .encoder import BertEncoder, LongTextEncoder
 from .nn import LinearRegression, LogisticRegression, SoftmaxRegression
-from .trainer import FileBinaryClassifierTrainer
+from .trainer import TextBinaryClassifierTrainer
 
 __AUTHOR__ = '吴子豪 / Vortez Wohl'
 __EMAIL__ = 'vortez.wohl@gmail.com'

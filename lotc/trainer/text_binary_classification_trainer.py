@@ -12,7 +12,7 @@ from lotc.trainer.base_trainer import BaseTrainer
 logger = logging.getLogger('lotc.trainer')
 
 
-class FileBinaryClassifierTrainer(BaseTrainer):
+class TextBinaryClassifierTrainer(BaseTrainer):
     def __init__(self, long_text_encoder: LongTextEncoder, batch_size: int = 2, train_ratio: float = 0.8):
         super().__init__(batch_size=batch_size, train_ratio=train_ratio)
         self._long_text_encoder = long_text_encoder
@@ -44,7 +44,7 @@ class FileBinaryClassifierTrainer(BaseTrainer):
         if self.model is None:
             self.model = LogisticRegression(input_dim=feature_dim, output_dim=1)
         loss_function = nn.BCELoss()
-        optimizer = optim.Adam(self.model.parameters(), lr=learning_rate)
+        optimizer = optim.Adamax(self.model.parameters(), lr=learning_rate)
         for epoch in range(num_epochs):
             self.model.train()
             total_loss = 0.0
