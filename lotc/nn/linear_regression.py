@@ -1,3 +1,4 @@
+import math
 from typing_extensions import override
 
 import torch
@@ -15,18 +16,18 @@ class LinearRegression(BaseNeuralNetwork):
         self.fc3 = nn.Linear(768, 128)
         self.fc4 = nn.Linear(128, 64)
         self.fc5 = nn.Linear(64, output_dim)
-        self.leaky_relu = nn.LeakyReLU(negative_slope=2e-7)
+        self.parametric_relu = nn.PReLU(num_parameters=math.floor(self.fc1.in_features / math.e) + 1, init=5e-2)
 
     @override
     def forward(self, x) -> torch.Tensor:
-        fc1_out = self.leaky_relu(self.fc1(x))
+        fc1_out = self.parametric_relu(self.fc1(x))
         x = nn.LayerNorm(normalized_shape=1024, eps=1e-9)(fc1_out)
         x = torch.dropout(x, p=0.2, train=self.training)
-        x = self.leaky_relu(self.fc2(x))
+        x = self.parametric_relu(self.fc2(x))
         x = nn.LayerNorm(normalized_shape=768, eps=1e-9)(x)
         x = torch.dropout(x, p=0.2, train=self.training)
-        x = self.leaky_relu(self.fc3(x))
+        x = self.parametric_relu(self.fc3(x))
         x = torch.dropout(x, p=0.2, train=self.training)
-        x = self.leaky_relu(self.fc4(x)) + self.fc1_to_fc4_res(fc1_out)
+        x = self.parametric_relu(self.fc4(x)) + self.fc1_to_fc4_res(fc1_out)
         x = self.fc5(x)
         return x
