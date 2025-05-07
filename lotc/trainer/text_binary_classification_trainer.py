@@ -20,7 +20,9 @@ class TextBinaryClassifierTrainer(BaseTrainer):
     @override
     def train(self, positive_texts: list[str], negative_texts: list[str],
               num_epochs: int, learning_rate: float = 2e-5, balancing_dataset: bool = True,
-              train_loss_threshold: float = 0.0, valid_loss_threshold: float = 0.0) -> LogisticRegression:
+              train_loss_threshold: float = 0.0, valid_loss_threshold: float = 0.0,
+              alpha: float = 1e-4, rho: float = 0.2,
+              lambda_l1: float = 1e-4, lambda_l2: float = 1e-4) -> LogisticRegression:
         if balancing_dataset:
             min_length = min(len(positive_texts), len(negative_texts))
             positive_texts = positive_texts[:min_length]
@@ -50,7 +52,10 @@ class TextBinaryClassifierTrainer(BaseTrainer):
             total_loss = 0.0
             for batch_texts, batch_labels in train_loader:
                 outputs = self.model.forward(batch_texts)
-                loss = loss_function(outputs, batch_labels)
+                loss = loss_function(outputs, batch_labels) + self.model.elastic_net(
+                    alpha=alpha, rho=rho,
+                    lambda_l1=lambda_l1, lambda_l2=lambda_l2
+                )
                 optimizer.zero_grad()
                 loss.backward()
                 optimizer.step()
@@ -61,7 +66,10 @@ class TextBinaryClassifierTrainer(BaseTrainer):
                     with torch.no_grad():
                         self.model.eval()
                         outputs = self.model.forward(batch_texts)
-                        loss = loss_function(outputs, batch_labels)
+                        loss = loss_function(outputs, batch_labels) + self.model.elastic_net(
+                            alpha=alpha, rho=rho,
+                            lambda_l1=lambda_l1, lambda_l2=lambda_l2
+                        )
                         total_valid_loss += loss.item()
                         self.model.train()
                 logger.debug(f"Epoch {epoch + 1}/{num_epochs} | "
