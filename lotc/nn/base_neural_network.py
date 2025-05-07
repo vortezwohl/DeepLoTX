@@ -9,7 +9,7 @@ class BaseNeuralNetwork(nn.Module):
             if model_name is not None \
             else self.__class__.__name__
 
-    def l1(self, _lambda: float = 0.) -> torch.Tensor:
+    def l1(self, _lambda: float = 1e-4) -> torch.Tensor:
         def _l1() -> torch.Tensor:
             l2_reg = torch.tensor(0.)
             for param in self.parameters():
@@ -17,7 +17,7 @@ class BaseNeuralNetwork(nn.Module):
             return l2_reg
         return _lambda * _l1()
 
-    def l2(self, _lambda: float = 0.) -> torch.Tensor:
+    def l2(self, _lambda: float = 1e-4) -> torch.Tensor:
         def _l2() -> torch.Tensor:
             l2_reg = torch.tensor(0.)
             for param in self.parameters():
@@ -25,8 +25,8 @@ class BaseNeuralNetwork(nn.Module):
             return l2_reg
         return _lambda * _l2()
 
-    def elastic_net(self, alpha: float = 0., rho: float = 0.5,
-                    lambda_l1: float = 1., lambda_l2: float = 1.) -> torch.Tensor:
+    def elastic_net(self, alpha: float = 1e-4, rho: float = 0.5,
+                    lambda_l1: float = 1e-4, lambda_l2: float = 1e-4) -> torch.Tensor:
         return alpha * rho * self.l1(_lambda=lambda_l1) + alpha * (1 - rho) * self.l2(_lambda=lambda_l2) / 2.
 
     def forward(self, x) -> torch.Tensor: ...
