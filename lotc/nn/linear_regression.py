@@ -16,7 +16,7 @@ class LinearRegression(BaseNeuralNetwork):
         self.fc3 = nn.Linear(768, 128)
         self.fc4 = nn.Linear(128, 64)
         self.fc5 = nn.Linear(64, output_dim)
-        self.parametric_relu = nn.PReLU(num_parameters=math.floor(self.fc1.in_features / math.e) + 1, init=5e-2)
+        self.parametric_relu = nn.PReLU(num_parameters=64, init=5e-2)
 
     @override
     def forward(self, x) -> torch.Tensor:
