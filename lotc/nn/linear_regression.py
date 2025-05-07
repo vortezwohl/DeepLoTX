@@ -15,7 +15,7 @@ class LinearRegression(BaseNeuralNetwork):
         self.fc3 = nn.Linear(768, 128)
         self.fc4 = nn.Linear(128, 64)
         self.fc5 = nn.Linear(64, output_dim)
-        self.leaky_relu = nn.LeakyReLU(negative_slope=0.05)
+        self.leaky_relu = nn.LeakyReLU(negative_slope=2e-7)
 
     @override
     def forward(self, x) -> torch.Tensor:
