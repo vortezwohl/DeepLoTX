@@ -9,6 +9,14 @@ class BaseNeuralNetwork(nn.Module):
             if model_name is not None \
             else self.__class__.__name__
 
+    def l2_regularization(self, _lambda: float = 0.) -> torch.Tensor:
+        def __l2_regularize() -> torch.Tensor:
+            l2_reg = torch.tensor(0.)
+            for param in self.parameters():
+                l2_reg += (torch.pow(param, exponent=2.)).sum()
+            return l2_reg
+        return _lambda * __l2_regularize()
+
     def forward(self, x) -> torch.Tensor: ...
 
     def predict(self, x) -> torch.Tensor:
