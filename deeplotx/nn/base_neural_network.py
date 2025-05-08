@@ -25,9 +25,8 @@ class BaseNeuralNetwork(nn.Module):
             return l2_reg
         return _lambda * _l2()
 
-    def elastic_net(self, alpha: float = 1e-4, rho: float = 0.5,
-                    lambda_l1: float = 1e-4, lambda_l2: float = 1e-4) -> torch.Tensor:
-        return alpha * rho * self.l1(_lambda=lambda_l1) + alpha * (1 - rho) * self.l2(_lambda=lambda_l2) / 2.
+    def elastic_net(self, alpha: float = 1e-4, rho: float = 0.5) -> torch.Tensor:
+        return alpha * rho * self.l1(_lambda=1.) + alpha * (1 - rho) * self.l2(_lambda=1.) / 2.
 
     def forward(self, x) -> torch.Tensor: ...
 
