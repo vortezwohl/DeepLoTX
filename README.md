@@ -1,17 +1,17 @@
-# LoTC: Easy2UseLongTextClassifierTrainers
+# DeepLoT: Easy2UseLongTextClassifierTrainers
 
 ## Installation
 
 - Install with pip
 
     ```
-    pip install git+https://github.com/vortezwohl/LoTC.git
+    pip install git+https://github.com/vortezwohl/DeepLoT.git
     ```
 
 - Install with uv
 
     ```
-    uv add git+https://github.com/vortezwohl/LoTC.git
+    uv add git+https://github.com/vortezwohl/DeepLoT.git
     ```
 
 ## Quick Start
