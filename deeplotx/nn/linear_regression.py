@@ -3,7 +3,7 @@ from typing_extensions import override
 import torch
 from torch import nn
 
-from deeplot.nn.base_neural_network import BaseNeuralNetwork
+from deeplotx.nn.base_neural_network import BaseNeuralNetwork
 
 
 class LinearRegression(BaseNeuralNetwork):

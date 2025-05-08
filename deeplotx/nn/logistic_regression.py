@@ -2,7 +2,7 @@ from typing_extensions import override
 
 import torch
 
-from deeplot.nn.linear_regression import LinearRegression
+from deeplotx.nn.linear_regression import LinearRegression
 
 
 class LogisticRegression(LinearRegression):

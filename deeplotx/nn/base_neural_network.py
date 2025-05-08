@@ -40,9 +40,9 @@ class BaseNeuralNetwork(nn.Module):
         return res
 
     def save(self):
-        torch.save(self.state_dict(), f'{self._model_name}.deeplot.pth')
+        torch.save(self.state_dict(), f'{self._model_name}.deeplotx.pth')
         return self
 
     def load(self):
-        self.load_state_dict(torch.load(f'{self._model_name}.deeplot.pth'))
+        self.load_state_dict(torch.load(f'{self._model_name}.deeplotx.pth'))
         return self

@@ -12,7 +12,7 @@ __EMAIL__ = 'vortez.wohl@gmail.com'
 __GITHUB__ = 'https://github.com/vortezwohl'
 __BLOG__ = 'https://vortezwohl.github.io'
 
-logger = logging.getLogger('deeplot')
+logger = logging.getLogger('deeplotx')
 logger.setLevel(logging.DEBUG)
 
 formatter = logging.Formatter('[%(levelname)s] %(asctime)s %(name)s : %(message)s')
@@ -22,7 +22,7 @@ console_handler.setLevel(logging.DEBUG)
 console_handler.setFormatter(formatter)
 logger.addHandler(console_handler)
 
-logger = logging.getLogger('deeplot.trainer')
+logger = logging.getLogger('deeplotx.trainer')
 logger.setLevel(logging.DEBUG)
-logger = logging.getLogger('deeplot.embedding')
+logger = logging.getLogger('deeplotx.embedding')
 logger.setLevel(logging.DEBUG)

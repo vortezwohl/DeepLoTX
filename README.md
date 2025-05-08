@@ -19,19 +19,19 @@
 To train a binary classifier for text files:
 
 ```python
-from deeplot.util import get_files, read_file
-from deeplot import TextBinaryClassifierTrainer, LongTextEncoder
+from deeplotx.util import get_files, read_file
+from deeplotx import TextBinaryClassifierTrainer, LongTextEncoder
 
 long_text_encoder = LongTextEncoder(
-    max_length=2048,
-    chunk_size=512,
-    overlapping=128
+  max_length=2048,
+  chunk_size=512,
+  overlapping=128
 )
 
 trainer = TextBinaryClassifierTrainer(
-    long_text_encoder=long_text_encoder,
-    batch_size=4,
-    train_ratio=0.9
+  long_text_encoder=long_text_encoder,
+  batch_size=4,
+  train_ratio=0.9
 )
 
 pos_data_path = './data/pos'

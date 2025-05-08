@@ -5,11 +5,11 @@ import torch
 from torch import nn, optim
 from torch.utils.data import DataLoader, TensorDataset
 
-from deeplot.encoder.long_text_encoder import LongTextEncoder
-from deeplot.nn.logistic_regression import LogisticRegression
-from deeplot.trainer.base_trainer import BaseTrainer
+from deeplotx.encoder.long_text_encoder import LongTextEncoder
+from deeplotx.nn.logistic_regression import LogisticRegression
+from deeplotx.trainer.base_trainer import BaseTrainer
 
-logger = logging.getLogger('deeplot.trainer')
+logger = logging.getLogger('deeplotx.trainer')
 
 
 class TextBinaryClassifierTrainer(BaseTrainer):
