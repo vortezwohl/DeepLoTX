@@ -14,5 +14,8 @@ def read_file(path: str, encoding: str = 'utf-8') -> str:
 
 
 def get_files(path: str) -> list:
-    entries = os.listdir(path)
-    return [os.path.join(path, entry) for entry in entries if os.path.isfile(os.path.join(path, entry))]
+    if os.path.exists(path):
+        entries = os.listdir(path)
+        return [os.path.join(path, entry) for entry in entries if os.path.isfile(os.path.join(path, entry))]
+    else:
+        return []
