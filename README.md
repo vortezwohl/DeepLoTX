@@ -1,17 +1,17 @@
-# DeepLoT: Easy2UseLongTextClassifierTrainers
+# DeepLoTX: Easy2UseLongTextClassifierTrainers
 
 ## Installation
 
 - Install with pip
 
     ```
-    pip install git+https://github.com/vortezwohl/DeepLoT.git
+    pip install git+https://github.com/vortezwohl/DeepLoTX.git
     ```
 
 - Install with uv
 
     ```
-    uv add git+https://github.com/vortezwohl/DeepLoT.git
+    uv add git+https://github.com/vortezwohl/DeepLoTX.git
     ```
 
 ## Quick Start
