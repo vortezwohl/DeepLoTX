@@ -1,6 +1,6 @@
 from abc import abstractmethod
 
-from lotc.nn.base_neural_network import BaseNeuralNetwork
+from deeplot.nn.base_neural_network import BaseNeuralNetwork
 
 
 class BaseTrainer(object):

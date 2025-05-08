@@ -3,7 +3,7 @@ import torch
 from torch import nn
 from transformers import BertTokenizer, BertModel
 
-from lotc import __ROOT__
+from deeplot import __ROOT__
 
 CACHE_PATH = f'{__ROOT__}\\.cache'
 DEFAULT_BERT = 'bert-base-uncased'

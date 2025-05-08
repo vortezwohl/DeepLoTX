@@ -5,10 +5,10 @@ from typing_extensions import override
 
 import torch
 
-from lotc.encoder.bert_encoder import BertEncoder, DEFAULT_BERT
-from lotc.util.hash import md5
+from deeplot.encoder.bert_encoder import BertEncoder, DEFAULT_BERT
+from deeplot.util.hash import md5
 
-logger = logging.getLogger('lotc.embedding')
+logger = logging.getLogger('deeplot.embedding')
 
 
 class LongTextEncoder(BertEncoder):

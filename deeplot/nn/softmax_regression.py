@@ -2,7 +2,7 @@ from typing_extensions import override
 
 import torch
 
-from lotc.nn.linear_regression import LinearRegression
+from deeplot.nn.linear_regression import LinearRegression
 
 
 class SoftmaxRegression(LinearRegression):

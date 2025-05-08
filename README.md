@@ -19,8 +19,8 @@
 To train a binary classifier for text files:
 
 ```python
-from lotc.util import get_files, read_file
-from lotc import TextBinaryClassifierTrainer, LongTextEncoder
+from deeplot.util import get_files, read_file
+from deeplot import TextBinaryClassifierTrainer, LongTextEncoder
 
 long_text_encoder = LongTextEncoder(
     max_length=2048,
