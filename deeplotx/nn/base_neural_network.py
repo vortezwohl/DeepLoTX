@@ -23,10 +23,10 @@ class BaseNeuralNetwork(nn.Module):
             for param in self.parameters():
                 l2_reg += (torch.pow(param, exponent=2.)).sum()
             return l2_reg
-        return _lambda * _l2()
+        return _lambda * _l2() / 2.
 
     def elastic_net(self, alpha: float = 1e-4, rho: float = 0.5) -> torch.Tensor:
-        return alpha * rho * self.l1(_lambda=1.) + alpha * (1 - rho) * self.l2(_lambda=1.) / 2.
+        return alpha * (rho * self.l1(_lambda=1.) + (1 - rho) * self.l2(_lambda=1.))
 
     def forward(self, x) -> torch.Tensor: ...
 
