@@ -1,3 +1,5 @@
+from abc import abstractmethod
+
 import torch
 from torch import nn
 
@@ -28,6 +30,7 @@ class BaseNeuralNetwork(nn.Module):
     def elastic_net(self, alpha: float = 1e-4, rho: float = 0.5) -> torch.Tensor:
         return alpha * (rho * self.l1(_lambda=1.) + (1 - rho) * self.l2(_lambda=1.))
 
+    @abstractmethod
     def forward(self, x) -> torch.Tensor: ...
 
     def predict(self, x) -> torch.Tensor:
