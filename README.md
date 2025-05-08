@@ -5,13 +5,19 @@
 - Install with pip
 
     ```
-    pip install git+https://github.com/vortezwohl/DeepLoTX.git
+    pip install -U deeplotx
     ```
 
 - Install with uv
 
     ```
-    uv add git+https://github.com/vortezwohl/DeepLoTX.git
+    uv add -U deeplotx
+    ```
+  
+- Install from github
+
+    ```
+    pip install -U git+https://github.com/vortezwohl/DeepLoTX.git
     ```
 
 ## Quick Start
