@@ -24,7 +24,7 @@ class LongTextEncoder(BertEncoder):
         return input_tup[0], super().forward(input_tup[1], attention_mask=input_tup[2])
 
     @override
-    def encode(self, text: str) -> torch.Tensor:
+    def encode(self, text: str, use_cache: bool = True) -> torch.Tensor:
         _text_to_show = text.replace("\n", str())
         logger.debug(f'Embedding \"{_text_to_show if len(_text_to_show) < 128 else _text_to_show[:128] + "..."}\".')
         # read cache
@@ -58,5 +58,6 @@ class LongTextEncoder(BertEncoder):
             fin_emb_tensor = torch.cat((fin_emb_tensor.detach().clone(), emb.detach().clone()), dim=-1)
         fin_emb_tensor = fin_emb_tensor.squeeze()
         # write cache
-        self._cache[_text_hash] = fin_emb_tensor
+        if use_cache:
+            self._cache[_text_hash] = fin_emb_tensor
         return fin_emb_tensor
