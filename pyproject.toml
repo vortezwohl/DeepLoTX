@@ -1,6 +1,6 @@
 [project]
 name = "deeplotx"
-version = "0.3.1"
+version = "0.3.2"
 description = "Easy-2-use long text classifier trainers."
 readme = "README.md"
 requires-python = ">=3.10"
