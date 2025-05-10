@@ -18,7 +18,7 @@ class BertEncoder(nn.Module):
                                               cache_dir=CACHE_PATH, _from_auto=True)
         self.embed_dim = self.bert.config.max_position_embeddings
 
-    def forward(self, input_ids, attention_mask: torch.Tensor) -> torch.Tensor:
+    def forward(self, input_ids: torch.Tensor, attention_mask: torch.Tensor) -> torch.Tensor:
         def _encoder(_input_tup: tuple[torch.Tensor, torch.Tensor]) -> torch.Tensor:
             return self.bert.forward(_input_tup[0], attention_mask=_input_tup[1]).last_hidden_state[:, 0, :]
 
