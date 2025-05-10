@@ -174,3 +174,4 @@ cython_debug/
 .pypirc
 
 test/data
+.pypi_token
