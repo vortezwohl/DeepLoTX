@@ -331,6 +331,31 @@ wheels = [
 ]
 
 [[package]]
+name = "deeplotx"
+version = "0.2.20"
+source = { virtual = "." }
+dependencies = [
+    { name = "huggingface-hub", extra = ["hf-xet"] },
+    { name = "jupyter" },
+    { name = "numpy" },
+    { name = "python-dotenv" },
+    { name = "torch" },
+    { name = "transformers" },
+    { name = "typing-extensions" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "huggingface-hub", extras = ["hf-xet"], specifier = ">=0.30.2" },
+    { name = "jupyter", specifier = ">=1.1.1" },
+    { name = "numpy", specifier = ">=2.2.5" },
+    { name = "python-dotenv", specifier = ">=1.1.0" },
+    { name = "torch", specifier = ">=2.7.0" },
+    { name = "transformers", specifier = ">=4.51.3" },
+    { name = "typing-extensions", specifier = ">=4.13.2" },
+]
+
+[[package]]
 name = "defusedxml"
 version = "0.7.1"
 source = { registry = "https://pypi.org/simple" }
@@ -877,31 +902,6 @@ source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/a1/94/766b8199e8a902a4c5ee12a9407a348bbabe9fa22400758576b153d17d8e/jupyterlab_widgets-3.0.14.tar.gz", hash = "sha256:bad03e59546869f026e537e0d170e454259e6dc7048e14041707ca31e523c8a1", size = 203815 }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/64/7a/f2479ba401e02f7fcbd3fc6af201eac888eaa188574b8e9df19452ab4972/jupyterlab_widgets-3.0.14-py3-none-any.whl", hash = "sha256:54c33e3306b7fca139d165d6190dc6c0627aafa5d14adfc974a4e9a3d26cb703", size = 213999 },
-]
-
-[[package]]
-name = "lotc"
-version = "0.1.1"
-source = { virtual = "." }
-dependencies = [
-    { name = "huggingface-hub", extra = ["hf-xet"] },
-    { name = "jupyter" },
-    { name = "numpy" },
-    { name = "python-dotenv" },
-    { name = "torch" },
-    { name = "transformers" },
-    { name = "typing-extensions" },
-]
-
-[package.metadata]
-requires-dist = [
-    { name = "huggingface-hub", extras = ["hf-xet"], specifier = ">=0.30.2" },
-    { name = "jupyter", specifier = ">=1.1.1" },
-    { name = "numpy", specifier = ">=2.2.5" },
-    { name = "python-dotenv", specifier = ">=1.1.0" },
-    { name = "torch", specifier = ">=2.7.0" },
-    { name = "transformers", specifier = ">=4.51.3" },
-    { name = "typing-extensions", specifier = ">=4.13.2" },
 ]
 
 [[package]]
