@@ -4,7 +4,13 @@ import os
 __ROOT__ = os.path.dirname(os.path.abspath(__file__))
 
 from .encoder import BertEncoder, LongTextEncoder, LongformerEncoder
-from .nn import LinearRegression, LogisticRegression, SoftmaxRegression
+from .nn import (
+    LinearRegression,
+    LogisticRegression,
+    SoftmaxRegression,
+    RecursiveSequential,
+    AutoRegression
+)
 from .trainer import TextBinaryClassifierTrainer
 
 __AUTHOR__ = '吴子豪 / Vortez Wohl'
