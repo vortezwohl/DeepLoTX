@@ -1,4 +1,8 @@
-# DeepLoTX: Easy2UseLongTextNLPToolkit
+[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/vortezwohl/LoTC)
+
+# DeepLoTX
+
+An Easy-2-use long text NLP toolkit
 
 ## Installation
 
