@@ -31,7 +31,7 @@ class BaseNeuralNetwork(nn.Module):
         return alpha * (rho * self.l1(_lambda=1.) + (1 - rho) * self.l2(_lambda=1.))
 
     @abstractmethod
-    def forward(self, x) -> torch.Tensor: ...
+    def forward(self, *args, **kwargs) -> torch.Tensor: ...
 
     def predict(self, x) -> torch.Tensor:
         __train = self.training
