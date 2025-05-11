@@ -1,4 +1,4 @@
-# DeepLoTX: Easy2UseLongTextClassifierTrainers
+# DeepLoTX: Easy2UseLongTextNLPToolkit
 
 ## Installation
 
@@ -22,7 +22,7 @@
 
 ## Quick Start
 
-To train a binary classifier for text files:
+To train a binary classifier from text files:
 
 ```python
 from deeplotx.util import get_files, read_file
