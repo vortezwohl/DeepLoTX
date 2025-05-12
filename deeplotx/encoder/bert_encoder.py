@@ -1,11 +1,13 @@
+import os
 import math
+
 import torch
 from torch import nn
 from transformers import BertTokenizer, BertModel
 
 from deeplotx import __ROOT__
 
-CACHE_PATH = f'{__ROOT__}\\.cache'
+CACHE_PATH = os.path.join(__ROOT__, '.cache')
 DEFAULT_BERT = 'bert-base-uncased'
 
 

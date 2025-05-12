@@ -1,10 +1,12 @@
+import os
+
 import torch
 from torch import nn
 from transformers import LongformerTokenizer, LongformerModel
 
 from deeplotx import __ROOT__
 
-CACHE_PATH = f'{__ROOT__}\\.cache'
+CACHE_PATH = os.path.join(__ROOT__, '.cache')
 DEFAULT_LONGFORMER = 'allenai/longformer-base-4096'
 
 
