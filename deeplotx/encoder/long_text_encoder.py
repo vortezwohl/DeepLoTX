@@ -24,7 +24,7 @@ class LongTextEncoder(BertEncoder):
         return input_tup[0], super().forward(input_tup[1], attention_mask=input_tup[2])
 
     @override
-    def encode(self, text: str, use_cache: bool = True, flatten: bool = True) -> torch.Tensor:
+    def encode(self, text: str, flatten: bool = True, use_cache: bool = True) -> torch.Tensor:
         def postprocess(tensors: list[torch.Tensor], _flatten: bool) -> torch.Tensor:
             if not _flatten:
                 return torch.stack(tensors, dim=0).squeeze()
