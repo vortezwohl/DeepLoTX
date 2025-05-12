@@ -24,13 +24,21 @@ class LongTextEncoder(BertEncoder):
         return input_tup[0], super().forward(input_tup[1], attention_mask=input_tup[2])
 
     @override
-    def encode(self, text: str, use_cache: bool = True) -> torch.Tensor:
+    def encode(self, text: str, use_cache: bool = True, flatten: bool = True) -> torch.Tensor:
+        def postprocess(tensors: list[torch.Tensor], _flatten: bool) -> torch.Tensor:
+            if not _flatten:
+                return torch.stack(tensors, dim=0).squeeze()
+            _fin_emb_tensor = torch.tensor([], dtype=torch.float32)
+            for _emb in fin_embedding:
+                _fin_emb_tensor = torch.cat((_fin_emb_tensor.detach().clone(), _emb.detach().clone()), dim=-1)
+            return _fin_emb_tensor.squeeze()
+
         _text_to_show = text.replace("\n", str())
         logger.debug(f'Embedding \"{_text_to_show if len(_text_to_show) < 128 else _text_to_show[:128] + "..."}\".')
         # read cache
         _text_hash = md5(text)
         if _text_hash in self._cache.keys():
-            return self._cache[_text_hash]
+            return postprocess(self._cache[_text_hash], flatten)
         _text_to_input_ids = self.tokenizer.encode(text.strip())[:self._max_length]
         _text_to_input_ids_att_mask = []
         # padding
@@ -53,11 +61,7 @@ class LongTextEncoder(BertEncoder):
             embeddings = list(executor.map(self.__chunk_embedding, chunks))
         embeddings.sort(key=lambda x: x[0])
         fin_embedding = [x[1] for x in embeddings]
-        fin_emb_tensor = torch.tensor([], dtype=torch.float32)
-        for emb in fin_embedding:
-            fin_emb_tensor = torch.cat((fin_emb_tensor.detach().clone(), emb.detach().clone()), dim=-1)
-        fin_emb_tensor = fin_emb_tensor.squeeze()
         # write cache
         if use_cache:
-            self._cache[_text_hash] = fin_emb_tensor
-        return fin_emb_tensor
+            self._cache[_text_hash] = fin_embedding
+        return postprocess(fin_embedding, flatten)
