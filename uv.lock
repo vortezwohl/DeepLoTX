@@ -332,7 +332,7 @@ wheels = [
 
 [[package]]
 name = "deeplotx"
-version = "0.4.8"
+version = "0.4.9"
 source = { virtual = "." }
 dependencies = [
     { name = "hf-xet" },
@@ -350,7 +350,7 @@ requires-dist = [
     { name = "hf-xet", specifier = ">=1.0.5" },
     { name = "jupyter" },
     { name = "numpy" },
-    { name = "protobuf", specifier = ">=6.31.1" },
+    { name = "protobuf" },
     { name = "python-dotenv", specifier = ">=1.1.0" },
     { name = "torch" },
     { name = "transformers" },
