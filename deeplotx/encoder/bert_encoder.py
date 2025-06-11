@@ -16,7 +16,8 @@ logger = logging.getLogger('deeplotx.embedding')
 class BertEncoder(nn.Module):
     def __init__(self, model_name_or_path: str = DEFAULT_BERT, device: str | None = None):
         super().__init__()
-        self.device = device if device is not None else torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+        self.device = torch.device(device) if device is not None \
+            else torch.device('cuda' if torch.cuda.is_available() else 'cpu')
         self.tokenizer = BertTokenizer.from_pretrained(pretrained_model_name_or_path=model_name_or_path,
                                                        cache_dir=CACHE_PATH, _from_auto=True)
         self.bert = BertModel.from_pretrained(pretrained_model_name_or_path=model_name_or_path,
