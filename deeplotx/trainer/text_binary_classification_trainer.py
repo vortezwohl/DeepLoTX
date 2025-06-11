@@ -48,8 +48,8 @@ class TextBinaryClassifierTrainer(BaseTrainer):
         if self.model is None:
             self.model = RecursiveSequential(input_dim=feature_dim, output_dim=1,
                                              hidden_dim=hidden_dim,
-                                             recursive_layers=recursive_layers)
-        self.model.to(self.device)
+                                             recursive_layers=recursive_layers,
+                                             device=self.device, dtype=dtype)
         loss_function = nn.BCELoss()
         optimizer = optim.Adamax(self.model.parameters(), lr=learning_rate)
         for epoch in range(num_epochs):
