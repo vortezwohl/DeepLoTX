@@ -11,14 +11,17 @@ DEFAULT_LONGFORMER = 'allenai/longformer-base-4096'
 
 
 class LongformerEncoder(nn.Module):
-    def __init__(self, model_name_or_path: str = DEFAULT_LONGFORMER):
+    def __init__(self, model_name_or_path: str = DEFAULT_LONGFORMER, device: str | None = None):
         super().__init__()
+        self.device = device if device is not None else torch.device('cuda' if torch.cuda.is_available() else 'cpu')
         self.tokenizer = LongformerTokenizer.from_pretrained(pretrained_model_name_or_path=model_name_or_path,
                                                              cache_dir=CACHE_PATH, _from_auto=True)
         self.bert = LongformerModel.from_pretrained(pretrained_model_name_or_path=model_name_or_path,
-                                                    cache_dir=CACHE_PATH, _from_auto=True)
+                                                    cache_dir=CACHE_PATH, _from_auto=True).to(self.device)
 
     def forward(self, input_ids: torch.Tensor, attention_mask: torch.Tensor) -> torch.Tensor:
+        input_ids = input_ids.to(self.device)
+        attention_mask = attention_mask.to(self.device)
         ori_mode = self.bert.training
         self.bert.eval()
         with torch.no_grad():

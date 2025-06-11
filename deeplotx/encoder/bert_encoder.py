@@ -12,18 +12,21 @@ DEFAULT_BERT = 'bert-base-uncased'
 
 
 class BertEncoder(nn.Module):
-    def __init__(self, model_name_or_path: str = DEFAULT_BERT):
+    def __init__(self, model_name_or_path: str = DEFAULT_BERT, device: str | None = None):
         super().__init__()
+        self.device = device if device is not None else torch.device('cuda' if torch.cuda.is_available() else 'cpu')
         self.tokenizer = BertTokenizer.from_pretrained(pretrained_model_name_or_path=model_name_or_path,
                                                        cache_dir=CACHE_PATH, _from_auto=True)
         self.bert = BertModel.from_pretrained(pretrained_model_name_or_path=model_name_or_path,
-                                              cache_dir=CACHE_PATH, _from_auto=True)
+                                              cache_dir=CACHE_PATH, _from_auto=True).to(self.device)
         self.embed_dim = self.bert.config.max_position_embeddings
 
     def forward(self, input_ids: torch.Tensor, attention_mask: torch.Tensor) -> torch.Tensor:
         def _encoder(_input_tup: tuple[torch.Tensor, torch.Tensor]) -> torch.Tensor:
             return self.bert.forward(_input_tup[0], attention_mask=_input_tup[1]).last_hidden_state[:, 0, :]
 
+        input_ids = input_ids.to(self.device)
+        attention_mask = attention_mask.to(self.device)
         num_chunks = math.ceil(input_ids.shape[-1] / self.embed_dim)
         chunks = chunk_results = []
         for i in range(num_chunks):
