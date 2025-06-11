@@ -6,8 +6,9 @@ from deeplotx.nn.linear_regression import LinearRegression
 
 
 class LogisticRegression(LinearRegression):
-    def __init__(self, input_dim: int, output_dim: int = 1, model_name: str | None = None):
-        super().__init__(input_dim=input_dim, output_dim=output_dim, model_name=model_name)
+    def __init__(self, input_dim: int, output_dim: int = 1, model_name: str | None = None,
+                 device: str | None = None, dtype: torch.dtype | None = None):
+        super().__init__(input_dim=input_dim, output_dim=output_dim, model_name=model_name, device=device, dtype=dtype)
 
     @override
     def forward(self, x) -> torch.Tensor:

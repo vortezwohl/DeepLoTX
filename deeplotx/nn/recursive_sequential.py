@@ -10,17 +10,20 @@ from deeplotx.nn import LinearRegression
 class RecursiveSequential(BaseNeuralNetwork):
     def __init__(self, input_dim: int, output_dim: int,
                  hidden_dim: int | None = None, recursive_layers: int = 2,
-                 model_name: str | None = None):
-        super().__init__(model_name=model_name)
+                 model_name: str | None = None, device: str | None = None,
+                 dtype: torch.dtype | None = None):
+        super().__init__(model_name=model_name, device=device, dtype=dtype)
         if hidden_dim is None:
             hidden_dim = input_dim
         self.lstm = nn.LSTM(input_size=input_dim, hidden_size=hidden_dim,
                             num_layers=recursive_layers, batch_first=True,
-                            bias=True, bidirectional=True)
-        self.regressive_head = LinearRegression(input_dim=hidden_dim * 2, output_dim=output_dim)
+                            bias=True, bidirectional=True, device=self.device,
+                            dtype=self.dtype)
+        self.regressive_head = LinearRegression(input_dim=hidden_dim * 2, output_dim=output_dim,
+                                                device=self.device, dtype=self.dtype)
 
     def initial_state(self, batch_size: int = 1) -> tuple[torch.Tensor, torch.Tensor]:
-        zeros = torch.zeros(self.lstm.num_layers * 2, batch_size, self.lstm.hidden_size).to(next(self.parameters()).device)
+        zeros = torch.zeros(self.lstm.num_layers * 2, batch_size, self.lstm.hidden_size, device=self.device, dtype=self.dtype)
         return zeros, zeros
 
     @override

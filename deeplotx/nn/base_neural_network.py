@@ -5,11 +5,14 @@ from torch import nn
 
 
 class BaseNeuralNetwork(nn.Module):
-    def __init__(self, model_name: str | None = None):
+    def __init__(self, model_name: str | None = None, device: str | None = None, dtype: torch.dtype | None = None):
         super().__init__()
         self._model_name = model_name \
             if model_name is not None \
             else self.__class__.__name__
+        self.device = torch.device(device) if device is not None \
+            else torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+        self.dtype = dtype if dtype is not None else torch.float32
 
     def l1(self, _lambda: float = 1e-4) -> torch.Tensor:
         def _l1() -> torch.Tensor:
