@@ -13,8 +13,8 @@ logger = logging.getLogger('deeplotx.embedding')
 
 class LongTextEncoder(BertEncoder):
     def __init__(self, max_length: int, chunk_size: int = 256,
-                 overlapping: int = 0, model_name_or_path: str = DEFAULT_BERT):
-        super().__init__(model_name_or_path=model_name_or_path)
+                 overlapping: int = 0, model_name_or_path: str = DEFAULT_BERT, device: str | None = None):
+        super().__init__(model_name_or_path=model_name_or_path, device=device)
         self._max_length = max_length
         self._chunk_size = chunk_size
         self._overlapping = overlapping
