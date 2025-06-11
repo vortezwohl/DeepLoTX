@@ -24,8 +24,6 @@ class LongformerEncoder(nn.Module):
         logger.debug(f'{LongformerEncoder.__name__} initialized on device: {self.device}.')
 
     def forward(self, input_ids: torch.Tensor, attention_mask: torch.Tensor) -> torch.Tensor:
-        input_ids = input_ids.to(self.device)
-        attention_mask = attention_mask.to(self.device)
         ori_mode = self.bert.training
         self.bert.eval()
         with torch.no_grad():
@@ -34,6 +32,6 @@ class LongformerEncoder(nn.Module):
         return res
 
     def encode(self, text: str) -> torch.Tensor:
-        _input_ids = torch.tensor([self.tokenizer.encode(text)], dtype=torch.long)
-        _att_mask = torch.tensor([[1] * _input_ids.shape[-1]], dtype=torch.int)
+        _input_ids = torch.tensor([self.tokenizer.encode(text)], dtype=torch.long, device=self.device)
+        _att_mask = torch.tensor([[1] * _input_ids.shape[-1]], dtype=torch.int, device=self.device)
         return self.forward(_input_ids, _att_mask).squeeze()

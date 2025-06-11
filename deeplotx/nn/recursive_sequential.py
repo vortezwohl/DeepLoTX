@@ -28,6 +28,9 @@ class RecursiveSequential(BaseNeuralNetwork):
 
     @override
     def forward(self, x, state: tuple[torch.Tensor, torch.Tensor]) -> tuple[torch.Tensor, tuple[torch.Tensor, torch.Tensor]]:
+        x = self.ensure_device_and_dtype(x, device=self.device, dtype=self.dtype)
+        state = (self.ensure_device_and_dtype(state[0], device=self.device, dtype=self.dtype),
+                 self.ensure_device_and_dtype(state[1], device=self.device, dtype=self.dtype))
         x, (hidden_state, cell_state) = self.lstm(x, state)
         x = self.regressive_head(x[:, -1, :])
         return x, (hidden_state, cell_state)

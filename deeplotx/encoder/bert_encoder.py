@@ -29,8 +29,6 @@ class BertEncoder(nn.Module):
         def _encoder(_input_tup: tuple[torch.Tensor, torch.Tensor]) -> torch.Tensor:
             return self.bert.forward(_input_tup[0], attention_mask=_input_tup[1]).last_hidden_state[:, 0, :]
 
-        input_ids = input_ids.to(self.device)
-        attention_mask = attention_mask.to(self.device)
         num_chunks = math.ceil(input_ids.shape[-1] / self.embed_dim)
         chunks = chunk_results = []
         for i in range(num_chunks):
@@ -45,6 +43,6 @@ class BertEncoder(nn.Module):
         return torch.cat(chunk_results, dim=-1)
 
     def encode(self, text: str) -> torch.Tensor:
-        _input_ids = torch.tensor([self.tokenizer.encode(text)], dtype=torch.long)
-        _att_mask = torch.tensor([[1] * _input_ids.shape[-1]], dtype=torch.int)
+        _input_ids = torch.tensor([self.tokenizer.encode(text)], dtype=torch.long, device=self.device)
+        _att_mask = torch.tensor([[1] * _input_ids.shape[-1]], dtype=torch.int, device=self.device)
         return self.forward(_input_ids, _att_mask).squeeze()

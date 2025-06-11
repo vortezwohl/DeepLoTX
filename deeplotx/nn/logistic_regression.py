@@ -12,4 +12,5 @@ class LogisticRegression(LinearRegression):
 
     @override
     def forward(self, x) -> torch.Tensor:
+        x = self.ensure_device_and_dtype(x, device=self.device, dtype=self.dtype)
         return torch.sigmoid(super().forward(x))

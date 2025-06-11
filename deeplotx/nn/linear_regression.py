@@ -23,6 +23,7 @@ class LinearRegression(BaseNeuralNetwork):
 
     @override
     def forward(self, x) -> torch.Tensor:
+        x = self.ensure_device_and_dtype(x, device=self.device, dtype=self.dtype)
         fc1_out = self.parametric_relu_1(self.fc1(x))
         x = nn.LayerNorm(normalized_shape=1024, eps=1e-9, device=self.device, dtype=self.dtype)(fc1_out)
         x = torch.dropout(x, p=0.2, train=self.training)

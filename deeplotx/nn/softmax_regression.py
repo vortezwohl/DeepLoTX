@@ -12,4 +12,5 @@ class SoftmaxRegression(LinearRegression):
 
     @override
     def forward(self, x) -> torch.Tensor:
-        return torch.softmax(super().forward(x), dim=-1, dtype=torch.float32)
+        x = self.ensure_device_and_dtype(x, device=self.device, dtype=self.dtype)
+        return torch.softmax(super().forward(x), dim=-1, dtype=self.dtype)
