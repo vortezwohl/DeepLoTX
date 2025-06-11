@@ -14,7 +14,7 @@
     pip install -U deeplotx
     ```
 
-- 使用 uv
+- 使用 uv (推荐)
 
     ```
     uv add -U deeplotx
