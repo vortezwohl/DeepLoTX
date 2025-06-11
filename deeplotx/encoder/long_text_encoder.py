@@ -28,7 +28,7 @@ class LongTextEncoder(BertEncoder):
         def postprocess(tensors: list[torch.Tensor], _flatten: bool) -> torch.Tensor:
             if not _flatten:
                 return torch.stack(tensors, dim=0).squeeze()
-            _fin_emb_tensor = torch.tensor([], dtype=tensors[0].dtype)
+            _fin_emb_tensor = torch.tensor([], dtype=tensors[0].dtype, device=self.device)
             for _emb in tensors:
                 _fin_emb_tensor = torch.cat((_fin_emb_tensor.detach().clone(), _emb.detach().clone()), dim=-1)
             return _fin_emb_tensor.squeeze()
@@ -55,8 +55,8 @@ class LongTextEncoder(BertEncoder):
         for i in range(num_chunks):
             _tmp_left = max(i * self._chunk_size - self._overlapping, 0)
             _tmp_right = (i + 1) * self._chunk_size + self._overlapping
-            chunks.append((i, torch.tensor([_text_to_input_ids[_tmp_left: _tmp_right]], dtype=torch.int),
-                           torch.tensor([_text_to_input_ids_att_mask[_tmp_left: _tmp_right]], dtype=torch.int)))
+            chunks.append((i, torch.tensor([_text_to_input_ids[_tmp_left: _tmp_right]], dtype=torch.int, device=self.device),
+                           torch.tensor([_text_to_input_ids_att_mask[_tmp_left: _tmp_right]], dtype=torch.int, device=self.device)))
         with ThreadPoolExecutor(max_workers=min(num_chunks + 1, 3)) as executor:
             embeddings = list(executor.map(self.__chunk_embedding, chunks))
         embeddings.sort(key=lambda x: x[0])
