@@ -14,6 +14,14 @@ class BaseNeuralNetwork(nn.Module):
             else torch.device('cuda' if torch.cuda.is_available() else 'cpu')
         self.dtype = dtype if dtype is not None else torch.float32
 
+    @staticmethod
+    def ensure_device_and_dtype(x: torch.Tensor, device: torch.device, dtype: torch.dtype) -> torch.Tensor:
+        if x.device != device:
+            x = x.to(device)
+        if x.dtype != dtype:
+            x = x.to(dtype)
+        return x
+
     def l1(self, _lambda: float = 1e-4) -> torch.Tensor:
         def _l1() -> torch.Tensor:
             l2_reg = torch.tensor(0.)
