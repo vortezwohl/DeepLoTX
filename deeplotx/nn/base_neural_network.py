@@ -24,7 +24,7 @@ class BaseNeuralNetwork(nn.Module):
 
     def l1(self, _lambda: float = 1e-4) -> torch.Tensor:
         def _l1() -> torch.Tensor:
-            l2_reg = torch.tensor(0.)
+            l2_reg = torch.tensor(0., device=self.device, dtype=self.dtype)
             for param in self.parameters():
                 l2_reg += (torch.abs(param)).sum()
             return l2_reg
@@ -32,7 +32,7 @@ class BaseNeuralNetwork(nn.Module):
 
     def l2(self, _lambda: float = 1e-4) -> torch.Tensor:
         def _l2() -> torch.Tensor:
-            l2_reg = torch.tensor(0.)
+            l2_reg = torch.tensor(0., device=self.device, dtype=self.dtype)
             for param in self.parameters():
                 l2_reg += (torch.pow(param, exponent=2.)).sum()
             return l2_reg
@@ -45,6 +45,7 @@ class BaseNeuralNetwork(nn.Module):
     def forward(self, *args, **kwargs) -> torch.Tensor: ...
 
     def predict(self, x) -> torch.Tensor:
+        x = self.ensure_device_and_dtype(x, device=self.device, dtype=self.dtype)
         __train = self.training
         self.training = False
         with torch.no_grad():
