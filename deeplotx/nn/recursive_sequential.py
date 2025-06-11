@@ -34,3 +34,13 @@ class RecursiveSequential(BaseNeuralNetwork):
         x, (hidden_state, cell_state) = self.lstm(x, state)
         x = self.regressive_head(x[:, -1, :])
         return x, (hidden_state, cell_state)
+
+    @override
+    def predict(self, x, batch_size: int | None = None) -> torch.Tensor:
+        _batch_size = batch_size if batch_size is not None else x.shape[0]
+        __train = self.training
+        self.training = False
+        with torch.no_grad():
+            res = self.forward(x, _batch_size)[0]
+        self.training = __train
+        return res
