@@ -16,6 +16,7 @@ class TextBinaryClassifierTrainer(BaseTrainer):
     def __init__(self, long_text_encoder: LongTextEncoder, batch_size: int = 2, train_ratio: float = 0.8):
         super().__init__(batch_size=batch_size, train_ratio=train_ratio)
         self._long_text_encoder = long_text_encoder
+        self.device = self._long_text_encoder.device
 
     @override
     def train(self, positive_texts: list[str], negative_texts: list[str],
@@ -27,8 +28,8 @@ class TextBinaryClassifierTrainer(BaseTrainer):
             positive_texts = positive_texts[:min_length]
             negative_texts = negative_texts[:min_length]
         all_texts = positive_texts + negative_texts
-        labels = ([torch.tensor([1.0], dtype=torch.float32) for _ in range(len(positive_texts))]
-                  + [torch.tensor([0.0], dtype=torch.float32) for _ in range(len(negative_texts))])
+        labels = ([torch.tensor([1.0], dtype=torch.float32, device=self.device) for _ in range(len(positive_texts))]
+                  + [torch.tensor([0.0], dtype=torch.float32, device=self.device) for _ in range(len(negative_texts))])
         text_embeddings = [self._long_text_encoder.encode(x) for x in all_texts]
         feature_dim = text_embeddings[0].shape[-1]
         inputs = torch.stack(text_embeddings)
@@ -44,6 +45,7 @@ class TextBinaryClassifierTrainer(BaseTrainer):
             self.model = None
         if self.model is None:
             self.model = LogisticRegression(input_dim=feature_dim, output_dim=1)
+        self.model.to(self.device)
         loss_function = nn.BCELoss()
         optimizer = optim.Adamax(self.model.parameters(), lr=learning_rate)
         for epoch in range(num_epochs):
