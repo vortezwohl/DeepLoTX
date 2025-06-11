@@ -58,5 +58,5 @@ class BaseNeuralNetwork(nn.Module):
         return self
 
     def load(self):
-        self.load_state_dict(torch.load(f'{self._model_name}.deeplotx'))
+        self.load_state_dict(torch.load(f'{self._model_name}.deeplotx', weights_only=True))
         return self
