@@ -20,7 +20,7 @@ class RecursiveSequential(BaseNeuralNetwork):
         self.regressive_head = LinearRegression(input_dim=hidden_dim * 2, output_dim=output_dim)
 
     def initial_state(self, batch_size: int = 1) -> tuple[torch.Tensor, torch.Tensor]:
-        zeros = torch.zeros(self.lstm.num_layers * 2, batch_size, self.lstm.hidden_size)
+        zeros = torch.zeros(self.lstm.num_layers * 2, batch_size, self.lstm.hidden_size).to(next(self.parameters()).device)
         return zeros, zeros
 
     @override
