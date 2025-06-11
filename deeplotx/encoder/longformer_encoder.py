@@ -1,3 +1,4 @@
+import logging
 import os
 
 import torch
@@ -8,6 +9,7 @@ from deeplotx import __ROOT__
 
 CACHE_PATH = os.path.join(__ROOT__, '.cache')
 DEFAULT_LONGFORMER = 'allenai/longformer-base-4096'
+logger = logging.getLogger('deeplotx.embedding')
 
 
 class LongformerEncoder(nn.Module):
@@ -18,6 +20,7 @@ class LongformerEncoder(nn.Module):
                                                              cache_dir=CACHE_PATH, _from_auto=True)
         self.bert = LongformerModel.from_pretrained(pretrained_model_name_or_path=model_name_or_path,
                                                     cache_dir=CACHE_PATH, _from_auto=True).to(self.device)
+        logger.debug(f'{LongformerEncoder.__name__} initialized on device: {self.device}.')
 
     def forward(self, input_ids: torch.Tensor, attention_mask: torch.Tensor) -> torch.Tensor:
         input_ids = input_ids.to(self.device)
