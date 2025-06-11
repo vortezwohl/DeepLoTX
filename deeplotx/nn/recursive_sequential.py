@@ -36,11 +36,10 @@ class RecursiveSequential(BaseNeuralNetwork):
         return x, (hidden_state, cell_state)
 
     @override
-    def predict(self, x, batch_size: int | None = None) -> torch.Tensor:
-        _batch_size = batch_size if batch_size is not None else x.shape[0]
+    def predict(self, x) -> torch.Tensor:
         __train = self.training
         self.training = False
         with torch.no_grad():
-            res = self.forward(x, _batch_size)[0]
+            res = self.forward(x.unsqueeze(0), self.initial_state(batch_size=1))[0]
         self.training = __train
         return res
