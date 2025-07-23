@@ -6,7 +6,7 @@ from torch import nn, optim
 from torch.utils.data import DataLoader, TensorDataset
 
 from deeplotx.encoder.long_text_encoder import LongTextEncoder
-from deeplotx.nn.recursive_sequential import RecursiveSequential
+from deeplotx.nn.long_context_auto_regression import LongContextRecursiveSequential
 from deeplotx.trainer.base_trainer import BaseTrainer
 
 logger = logging.getLogger('deeplotx.trainer')
@@ -23,7 +23,7 @@ class TextBinaryClassifierTrainer(BaseTrainer):
               num_epochs: int, learning_rate: float = 2e-6, balancing_dataset: bool = True,
               train_loss_threshold: float = 0.0, valid_loss_threshold: float = 0.0,
               alpha: float = 1e-4, rho: float = 0.2,
-              hidden_dim: int = 256, recursive_layers: int = 2) -> RecursiveSequential:
+              hidden_dim: int = 256, recursive_layers: int = 2) -> LongContextRecursiveSequential:
         if balancing_dataset:
             min_length = min(len(positive_texts), len(negative_texts))
             positive_texts = positive_texts[:min_length]
@@ -46,10 +46,10 @@ class TextBinaryClassifierTrainer(BaseTrainer):
             logger.warning("The dimension of features doesn't match. A new model instance will be created.")
             self.model = None
         if self.model is None:
-            self.model = RecursiveSequential(input_dim=feature_dim, output_dim=1,
-                                             hidden_dim=hidden_dim,
-                                             recursive_layers=recursive_layers,
-                                             device=self.device, dtype=dtype)
+            self.model = LongContextRecursiveSequential(input_dim=feature_dim, output_dim=1,
+                                                        hidden_dim=hidden_dim,
+                                                        recursive_layers=recursive_layers,
+                                                        device=self.device, dtype=dtype)
         loss_function = nn.BCELoss()
         optimizer = optim.Adamax(self.model.parameters(), lr=learning_rate)
         for epoch in range(num_epochs):
@@ -76,7 +76,8 @@ class TextBinaryClassifierTrainer(BaseTrainer):
                              f"Valid Loss: {total_valid_loss:.4f}")
                 if total_valid_loss < valid_loss_threshold:
                     break
-            logger.debug(f"Epoch {epoch + 1}/{num_epochs} | Train Loss: {total_loss:.4f}")
+            else:
+                logger.debug(f"Epoch {epoch + 1}/{num_epochs} | Train Loss: {total_loss:.4f}")
             if total_loss < train_loss_threshold:
                 break
         return self.model
