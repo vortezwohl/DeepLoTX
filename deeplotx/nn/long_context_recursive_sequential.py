@@ -8,15 +8,16 @@ from deeplotx.nn.self_attention import SelfAttention
 
 
 class LongContextRecursiveSequential(RecursiveSequential):
-    def __init__(self, feature_dim: int, hidden_dim: int | None = None,
-                 recursive_layers: int = 2, model_name: str | None = None,
-                 device: str | None = None, dtype: torch.dtype | None = None):
-        super().__init__(input_dim=feature_dim, output_dim=feature_dim,
+    def __init__(self, input_dim: int, output_dim: int,
+                 hidden_dim: int | None = None, recursive_layers: int = 2,
+                 model_name: str | None = None, device: str | None = None,
+                 dtype: torch.dtype | None = None):
+        super().__init__(input_dim=input_dim, output_dim=output_dim,
                          hidden_dim=hidden_dim, recursive_layers=recursive_layers,
                          model_name=model_name, device=device, dtype=dtype)
-        self._feature_dim = feature_dim
-        self.self_attention = SelfAttention(feature_dim=feature_dim)
-        self.proj = nn.Linear(in_features=feature_dim * 2, out_features=feature_dim,
+        self._feature_dim = input_dim
+        self.self_attention = SelfAttention(feature_dim=input_dim)
+        self.proj = nn.Linear(in_features=input_dim * 2, out_features=input_dim,
                               bias=True, device=self.device, dtype=self.dtype)
 
     @override

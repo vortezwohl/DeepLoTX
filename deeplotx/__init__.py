@@ -11,7 +11,8 @@ from .nn import (
     RecursiveSequential,
     LongContextRecursiveSequential,
     SelfAttention,
-    AutoRegression
+    AutoRegression,
+    LongContextAutoRegression
 )
 from .trainer import TextBinaryClassifierTrainer
 
