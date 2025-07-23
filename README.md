@@ -149,7 +149,10 @@
         LogisticRegression,  # 逻辑回归 / 二分类 / 多标签分类
         SoftmaxRegression,  # Softmax 回归 / 多分类
         RecursiveSequential,  # 序列模型 / 循环神经网络
-        AutoRegression  # 自回归模型
+        LongContextRecursiveSequential,  # 长上下文序列模型 / 自注意力融合循环神经网络
+        SelfAttention,  # 自注意力模块
+        AutoRegression,  # 自回归模型 / 循环神经网络
+        LongContextAutoRegression  # 长上下文自回归模型 / 自注意力融合循环神经网络
     )
     ```
 
@@ -193,4 +196,85 @@
             x = self.parametric_relu_4(self.fc4(x)) + self.fc1_to_fc4_res(fc1_out)
             x = self.fc5(x)
             return x
+    ```
+
+    自注意力模块:
+
+    ```python
+    from typing_extensions import override
+
+    import torch
+    from torch import nn, softmax
+
+    from deeplotx.nn.base_neural_network import BaseNeuralNetwork
+
+
+    class SelfAttention(BaseNeuralNetwork):
+        def __init__(self, feature_dim: int, model_name: str | None = None,
+                    device: str | None = None, dtype: torch.dtype | None = None):
+            super().__init__(model_name=model_name, device=device, dtype=dtype)
+            self._feature_dim = feature_dim
+            self.q_proj = nn.Linear(in_features=self._feature_dim, out_features=self._feature_dim,
+                                    bias=True, device=self.device, dtype=self.dtype)
+            self.k_proj = nn.Linear(in_features=self._feature_dim, out_features=self._feature_dim,
+                                    bias=True, device=self.device, dtype=self.dtype)
+            self.v_proj = nn.Linear(in_features=self._feature_dim, out_features=self._feature_dim,
+                                    bias=True, device=self.device, dtype=self.dtype)
+
+        def _attention(self, x: torch.Tensor, mask: torch.Tensor | None = None) -> torch.Tensor:
+            q, k = self.q_proj(x), self.k_proj(x)
+            attn = torch.matmul(q, k.transpose(-2, -1))
+            attn = attn / (self._feature_dim ** 0.5)
+            attn = attn.masked_fill(mask == 0, -1e9) if mask is not None else attn
+            return softmax(attn, dim=-1)
+
+        @override
+        def forward(self, x: torch.Tensor, mask: torch.Tensor | None = None) -> torch.Tensor:
+            x = self.ensure_device_and_dtype(x, device=self.device, dtype=self.dtype)
+            if mask is not None:
+                mask = self.ensure_device_and_dtype(mask, device=self.device, dtype=self.dtype)
+            v = self.v_proj(x)
+            return torch.matmul(self._attention(x, mask), v)
+    ```
+
+- ### 使用预定义训练器实现文本二分类任务
+
+    ```python
+    from deeplotx import TextBinaryClassifierTrainer, LongTextEncoder
+    from deeplotx.util import get_files, read_file
+
+    # 定义向量编码策略 (默认使用 bert-base-uncased 作为嵌入模型)
+    long_text_encoder = LongTextEncoder(
+        max_length=2048,  # 最大文本大小, 超出截断
+        chunk_size=448,  # 块大小 (按 Token 计)
+        overlapping=32  # 块间重叠大小 (按 Token 计)
+    )
+
+    trainer = TextBinaryClassifierTrainer(
+        long_text_encoder=long_text_encoder,
+        batch_size=2,
+        train_ratio=0.9  # 训练集和验证集比例
+    )
+
+    # 读取数据
+    pos_data_path = 'path/to/pos_dir'
+    neg_data_path = 'path/to/neg_dir'
+    pos_data = [read_file(x) for x in get_files(pos_data_path)]
+    neg_data = [read_file(x) for x in get_files(neg_data_path)]
+
+    # 开始训练
+    model = trainer.train(pos_data, neg_data, 
+                          num_epochs=36, learning_rate=2e-5,  # 设置训练轮数和学习率
+                          balancing_dataset=True,  # 是否平衡数据集
+                          alpha=1e-4, rho=.2,  # 设置 elastic net 正则化的超参数 alpha 和 rho
+                          hidden_dim=256, recursive_layers=2)  # 设置循环神经网络的结构
+
+    # 保存模型权重
+    model.save(model_name='test_model', model_dir='model')
+
+    # 加载已保存的模型
+    model = model.load(model_name='test_model', model_dir='model')
+
+    # 使用训练好的模型进行预测
+    model.predict(long_text_encoder.encode('这是一个测试文本.', flatten=False))
     ```

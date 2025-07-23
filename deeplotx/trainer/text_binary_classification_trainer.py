@@ -17,6 +17,8 @@ class TextBinaryClassifierTrainer(BaseTrainer):
         super().__init__(batch_size=batch_size, train_ratio=train_ratio)
         self._long_text_encoder = long_text_encoder
         self.device = self._long_text_encoder.device
+        self.train_dataset_loader = None
+        self.valid_dataset_loader = None
 
     @override
     def train(self, positive_texts: list[str], negative_texts: list[str],
@@ -40,8 +42,9 @@ class TextBinaryClassifierTrainer(BaseTrainer):
         train_size = int(self._train_ratio * dataset_size)
         train_dataset = TensorDataset(inputs[:train_size], labels[:train_size])
         valid_dataset = TensorDataset(inputs[train_size:], labels[train_size:])
-        train_loader = DataLoader(train_dataset, batch_size=self._batch_size, shuffle=True)
-        valid_loader = DataLoader(valid_dataset, batch_size=self._batch_size, shuffle=True)
+        self.train_dataset_loader = DataLoader(train_dataset, batch_size=self._batch_size, shuffle=True)
+        self.valid_dataset_loader = DataLoader(valid_dataset, batch_size=self._batch_size, shuffle=True)
+
         if self.model is not None and self.model.fc1.in_features != feature_dim:
             logger.warning("The dimension of features doesn't match. A new model instance will be created.")
             self.model = None
@@ -55,7 +58,7 @@ class TextBinaryClassifierTrainer(BaseTrainer):
         for epoch in range(num_epochs):
             self.model.train()
             total_loss = 0.0
-            for batch_texts, batch_labels in train_loader:
+            for batch_texts, batch_labels in self.train_dataset_loader:
                 outputs = torch.sigmoid(self.model.forward(batch_texts, self.model.initial_state(batch_texts.shape[0]))[0])
                 loss = loss_function(outputs, batch_labels) + self.model.elastic_net(alpha=alpha, rho=rho)
                 optimizer.zero_grad()
@@ -64,7 +67,7 @@ class TextBinaryClassifierTrainer(BaseTrainer):
                 total_loss += loss.item()
             if epoch % 3 == 0:
                 total_valid_loss = 0.0
-                for batch_texts, batch_labels in valid_loader:
+                for batch_texts, batch_labels in self.valid_dataset_loader:
                     with torch.no_grad():
                         self.model.eval()
                         outputs = torch.sigmoid(self.model.forward(batch_texts, self.model.initial_state(batch_texts.shape[0]))[0])
