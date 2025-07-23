@@ -1,0 +1,34 @@
+from typing_extensions import override
+
+import torch
+from torch import nn, softmax
+
+from deeplotx.nn.base_neural_network import BaseNeuralNetwork
+
+
+class SelfAttention(BaseNeuralNetwork):
+    def __init__(self, feature_dim: int, model_name: str | None = None,
+                 device: str | None = None, dtype: torch.dtype | None = None):
+        super().__init__(model_name=model_name, device=device, dtype=dtype)
+        self._feature_dim = feature_dim
+        self.q_proj = nn.Linear(in_features=self._feature_dim, out_features=self._feature_dim,
+                                bias=True, device=self.device, dtype=self.dtype)
+        self.k_proj = nn.Linear(in_features=self._feature_dim, out_features=self._feature_dim,
+                                bias=True, device=self.device, dtype=self.dtype)
+        self.v_proj = nn.Linear(in_features=self._feature_dim, out_features=self._feature_dim,
+                                bias=True, device=self.device, dtype=self.dtype)
+
+    def _attention(self, x: torch.Tensor, mask: torch.Tensor | None = None) -> torch.Tensor:
+        q, k = self.q_proj(x), self.k_proj(x)
+        attn = torch.matmul(q, k.transpose(-2, -1))
+        attn = attn / (self._feature_dim ** 0.5)
+        attn = attn.masked_fill(mask == 0, -1e9) if mask is not None else attn
+        return softmax(attn, dim=-1)
+
+    @override
+    def forward(self, x: torch.Tensor, mask: torch.Tensor | None = None) -> torch.Tensor:
+        x = self.ensure_device_and_dtype(x, device=self.device, dtype=self.dtype)
+        if mask is not None:
+            mask = self.ensure_device_and_dtype(mask, device=self.device, dtype=self.dtype)
+        v = self.v_proj(x)
+        return torch.matmul(self._attention(x, mask), v)

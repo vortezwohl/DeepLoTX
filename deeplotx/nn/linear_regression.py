@@ -22,7 +22,7 @@ class LinearRegression(BaseNeuralNetwork):
         self.parametric_relu_4 = nn.PReLU(num_parameters=1, init=5e-3, device=self.device, dtype=self.dtype)
 
     @override
-    def forward(self, x) -> torch.Tensor:
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
         x = self.ensure_device_and_dtype(x, device=self.device, dtype=self.dtype)
         fc1_out = self.parametric_relu_1(self.fc1(x))
         x = nn.LayerNorm(normalized_shape=1024, eps=1e-9, device=self.device, dtype=self.dtype)(fc1_out)

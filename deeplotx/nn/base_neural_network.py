@@ -44,7 +44,7 @@ class BaseNeuralNetwork(nn.Module):
     @abstractmethod
     def forward(self, *args, **kwargs) -> torch.Tensor: ...
 
-    def predict(self, x) -> torch.Tensor:
+    def predict(self, x: torch.Tensor) -> torch.Tensor:
         x = self.ensure_device_and_dtype(x, device=self.device, dtype=self.dtype)
         __train = self.training
         self.training = False

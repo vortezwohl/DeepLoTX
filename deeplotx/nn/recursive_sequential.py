@@ -27,7 +27,7 @@ class RecursiveSequential(BaseNeuralNetwork):
         return zeros, zeros
 
     @override
-    def forward(self, x, state: tuple[torch.Tensor, torch.Tensor]) -> tuple[torch.Tensor, tuple[torch.Tensor, torch.Tensor]]:
+    def forward(self, x: torch.Tensor, state: tuple[torch.Tensor, torch.Tensor]) -> tuple[torch.Tensor, tuple[torch.Tensor, torch.Tensor]]:
         x = self.ensure_device_and_dtype(x, device=self.device, dtype=self.dtype)
         state = (self.ensure_device_and_dtype(state[0], device=self.device, dtype=self.dtype),
                  self.ensure_device_and_dtype(state[1], device=self.device, dtype=self.dtype))
@@ -36,7 +36,7 @@ class RecursiveSequential(BaseNeuralNetwork):
         return x, (hidden_state, cell_state)
 
     @override
-    def predict(self, x) -> torch.Tensor:
+    def predict(self, x: torch.Tensor) -> torch.Tensor:
         __train = self.training
         self.training = False
         with torch.no_grad():
