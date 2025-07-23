@@ -6,7 +6,7 @@ from torch import nn, optim
 from torch.utils.data import DataLoader, TensorDataset
 
 from deeplotx.encoder.long_text_encoder import LongTextEncoder
-from deeplotx.nn.long_context_auto_regression import LongContextRecursiveSequential
+from deeplotx.nn.long_context_recursive_sequential import LongContextRecursiveSequential
 from deeplotx.trainer.base_trainer import BaseTrainer
 
 logger = logging.getLogger('deeplotx.trainer')
