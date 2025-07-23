@@ -1,3 +1,4 @@
+import os
 from abc import abstractmethod
 
 import torch
@@ -53,10 +54,12 @@ class BaseNeuralNetwork(nn.Module):
         self.training = __train
         return res
 
-    def save(self):
-        torch.save(self.state_dict(), f'{self._model_name}.deeplotx')
+    def save(self, model_name: str | None = None, model_dir: str = '.'):
+        model_file_name = f'{model_name}.deeplotx' if model_name is not None else f'{self._model_name}.deeplotx'
+        torch.save(self.state_dict(), os.path.join(model_dir, model_file_name))
         return self
 
-    def load(self):
-        self.load_state_dict(torch.load(f'{self._model_name}.deeplotx', map_location=self.device, weights_only=True))
+    def load(self, model_name: str | None = None, model_dir: str = '.'):
+        model_file_name = f'{model_name}.deeplotx' if model_name is not None else f'{self._model_name}.deeplotx'
+        self.load_state_dict(torch.load(os.path.join(model_dir, model_file_name), map_location=self.device, weights_only=True))
         return self
