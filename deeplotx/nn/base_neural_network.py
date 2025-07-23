@@ -4,6 +4,8 @@ from abc import abstractmethod
 import torch
 from torch import nn
 
+DEFAULT_SUFFIX = 'dlx'
+
 
 class BaseNeuralNetwork(nn.Module):
     def __init__(self, model_name: str | None = None, device: str | None = None, dtype: torch.dtype | None = None):
@@ -54,12 +56,13 @@ class BaseNeuralNetwork(nn.Module):
         self.training = __train
         return res
 
-    def save(self, model_name: str | None = None, model_dir: str = '.'):
-        model_file_name = f'{model_name}.deeplotx' if model_name is not None else f'{self._model_name}.deeplotx'
+    def save(self, model_name: str | None = None, model_dir: str = '.', _suffix: str = DEFAULT_SUFFIX):
+        os.makedirs(model_dir, exist_ok=True)
+        model_file_name = f'{model_name}.{_suffix}' if model_name is not None else f'{self._model_name}.{_suffix}'
         torch.save(self.state_dict(), os.path.join(model_dir, model_file_name))
         return self
 
-    def load(self, model_name: str | None = None, model_dir: str = '.'):
-        model_file_name = f'{model_name}.deeplotx' if model_name is not None else f'{self._model_name}.deeplotx'
+    def load(self, model_name: str | None = None, model_dir: str = '.', _suffix: str = DEFAULT_SUFFIX):
+        model_file_name = f'{model_name}.{_suffix}' if model_name is not None else f'{self._model_name}.{_suffix}'
         self.load_state_dict(torch.load(os.path.join(model_dir, model_file_name), map_location=self.device, weights_only=True))
         return self
