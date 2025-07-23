@@ -9,6 +9,8 @@ from .nn import (
     LogisticRegression,
     SoftmaxRegression,
     RecursiveSequential,
+    LongContextRecursiveSequential,
+    SelfAttention,
     AutoRegression
 )
 from .trainer import TextBinaryClassifierTrainer

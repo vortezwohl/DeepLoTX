@@ -2,4 +2,6 @@ from .linear_regression import LinearRegression
 from .logistic_regression import LogisticRegression
 from .softmax_regression import SoftmaxRegression
 from .recursive_sequential import RecursiveSequential
+from .long_context_recursive_sequential import LongContextRecursiveSequential
+from .self_attention import SelfAttention
 from .auto_regression import AutoRegression
