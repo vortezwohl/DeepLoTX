@@ -25,7 +25,7 @@ class Encoder(nn.Module):
         self.embed_dim = self.encoder.config.max_position_embeddings
         logger.debug(f'{Encoder.__name__} initialized on device: {self.device}.')
 
-    def forward(self, input_ids: torch.Tensor, attention_mask: torch.Tensor) -> torch.Tensor:
+    def forward(self, input_ids: torch.Tensor, attention_mask: torch.Tensor, *args, **kwargs) -> torch.Tensor:
         def _encoder(_input_tup: tuple[torch.Tensor, torch.Tensor]) -> torch.Tensor:
             return self.encoder.forward(_input_tup[0], attention_mask=_input_tup[1]).last_hidden_state[:, 0, :]
 

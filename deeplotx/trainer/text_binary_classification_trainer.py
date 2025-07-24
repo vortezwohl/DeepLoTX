@@ -31,7 +31,7 @@ class TextBinaryClassifierTrainer(BaseTrainer):
             positive_texts = positive_texts[:min_length]
             negative_texts = negative_texts[:min_length]
         all_texts = positive_texts + negative_texts
-        text_embeddings = [self._long_text_encoder.encode(x, flatten=False, use_cache=True) for x in all_texts]
+        text_embeddings = [self._long_text_encoder.encode(x, flatten=False) for x in all_texts]
         feature_dim = text_embeddings[0].shape[-1]
         dtype = text_embeddings[0].dtype
         labels = ([torch.tensor([1.], dtype=dtype, device=self.device) for _ in range(len(positive_texts))]

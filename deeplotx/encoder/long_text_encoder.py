@@ -26,6 +26,10 @@ class LongTextEncoder(Encoder):
         return idx, super().forward(x, attention_mask=mask)
 
     @override
+    def forward(self, text: str, flatten: bool = False, *args, **kwargs) -> torch.Tensor:
+        return self.encode(text=text, flatten=flatten)
+
+    @override
     def encode(self, text: str, flatten: bool = False) -> torch.Tensor:
         def postprocess(tensors: list[torch.Tensor], _flatten: bool) -> torch.Tensor:
             if not _flatten:
