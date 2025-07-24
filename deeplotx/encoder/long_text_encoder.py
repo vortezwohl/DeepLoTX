@@ -1,30 +1,32 @@
 import logging
 import math
-from concurrent.futures import ThreadPoolExecutor
 from typing_extensions import override
 
 import torch
+from vortezwohl.concurrent import ThreadPool
+from vortezwohl.cache import LRUCache
 
 from deeplotx.encoder.encoder import Encoder, DEFAULT_BERT
-from deeplotx.util.hash import md5
+from deeplotx.util.hash import sha512
 
 logger = logging.getLogger('deeplotx.embedding')
 
 
 class LongTextEncoder(Encoder):
-    def __init__(self, max_length: int, chunk_size: int = 256,
-                 overlapping: int = 0, model_name_or_path: str = DEFAULT_BERT, device: str | None = None):
+    def __init__(self, max_length: int, chunk_size: int = 448,
+                 overlapping: int = 32, model_name_or_path: str = DEFAULT_BERT,
+                 cache_capacity: int = 64, device: str | None = None):
         super().__init__(model_name_or_path=model_name_or_path, device=device)
         self._max_length = max_length
         self._chunk_size = chunk_size
         self._overlapping = overlapping
-        self._cache = dict()
+        self._cache = LRUCache(capacity=cache_capacity)
 
-    def __chunk_embedding(self, input_tup: tuple[int, torch.Tensor]) -> tuple[int, torch.Tensor]:
-        return input_tup[0], super().forward(input_tup[1], attention_mask=input_tup[2])
+    def __chunk_embedding(self, idx: int, x: torch.Tensor, mask: torch.Tensor) -> tuple[int, torch.Tensor]:
+        return idx, super().forward(x, attention_mask=mask)
 
     @override
-    def encode(self, text: str, flatten: bool = True, use_cache: bool = True) -> torch.Tensor:
+    def encode(self, text: str, flatten: bool = False) -> torch.Tensor:
         def postprocess(tensors: list[torch.Tensor], _flatten: bool) -> torch.Tensor:
             if not _flatten:
                 return torch.stack(tensors, dim=0).squeeze()
@@ -36,8 +38,8 @@ class LongTextEncoder(Encoder):
         _text_to_show = text.replace("\n", str())
         logger.debug(f'Embedding \"{_text_to_show if len(_text_to_show) < 128 else _text_to_show[:128] + "..."}\".')
         # read cache
-        _text_hash = md5(text)
-        if _text_hash in self._cache.keys():
+        _text_hash = sha512(text)
+        if _text_hash in self._cache:
             return postprocess(self._cache[_text_hash], flatten)
         _text_to_input_ids = self.tokenizer.encode(text.strip())[:self._max_length]
         _text_to_input_ids_att_mask = []
@@ -57,11 +59,9 @@ class LongTextEncoder(Encoder):
             _tmp_right = (i + 1) * self._chunk_size + self._overlapping
             chunks.append((i, torch.tensor([_text_to_input_ids[_tmp_left: _tmp_right]], dtype=torch.int, device=self.device),
                            torch.tensor([_text_to_input_ids_att_mask[_tmp_left: _tmp_right]], dtype=torch.int, device=self.device)))
-        with ThreadPoolExecutor(max_workers=min(num_chunks + 1, 3)) as executor:
-            embeddings = list(executor.map(self.__chunk_embedding, chunks))
-        embeddings.sort(key=lambda x: x[0])
+        embeddings = list(ThreadPool(max_workers=min(num_chunks + 1, 8)).map(self.__chunk_embedding, chunks))
+        embeddings = sorted([x.returns for x in embeddings], key=lambda x: x[0], reverse=False)
         fin_embedding = [x[1] for x in embeddings]
         # write cache
-        if use_cache:
-            self._cache[_text_hash] = fin_embedding
+        self._cache[_text_hash] = fin_embedding
         return postprocess(fin_embedding, flatten)
