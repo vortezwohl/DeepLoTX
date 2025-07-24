@@ -5,13 +5,13 @@ description = "Easy-2-use long text NLP toolkit."
 readme = "README.md"
 requires-python = ">=3.10"
 dependencies = [
-    "hf-xet>=1.0.5",
+    "hf-xet",
     "jupyter",
     "numpy",
     "protobuf",
-    "python-dotenv>=1.1.0",
+    "python-dotenv",
     "torch",
     "transformers",
-    "typing-extensions>=4.13.2",
+    "typing-extensions",
     "vortezwohl>=0.0.6",
 ]
