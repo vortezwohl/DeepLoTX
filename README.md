@@ -247,7 +247,8 @@
     long_text_encoder = LongTextEncoder(
         max_length=2048,  # 最大文本大小, 超出截断
         chunk_size=448,  # 块大小 (按 Token 计)
-        overlapping=32  # 块间重叠大小 (按 Token 计)
+        overlapping=32,  # 块间重叠大小 (按 Token 计)
+        cache_capacity=512  # 缓存大小
     )
 
     trainer = TextBinaryClassifierTrainer(
