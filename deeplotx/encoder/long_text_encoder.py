@@ -5,13 +5,13 @@ from typing_extensions import override
 
 import torch
 
-from deeplotx.encoder.bert_encoder import BertEncoder, DEFAULT_BERT
+from deeplotx.encoder.encoder import Encoder, DEFAULT_BERT
 from deeplotx.util.hash import md5
 
 logger = logging.getLogger('deeplotx.embedding')
 
 
-class LongTextEncoder(BertEncoder):
+class LongTextEncoder(Encoder):
     def __init__(self, max_length: int, chunk_size: int = 256,
                  overlapping: int = 0, model_name_or_path: str = DEFAULT_BERT, device: str | None = None):
         super().__init__(model_name_or_path=model_name_or_path, device=device)
