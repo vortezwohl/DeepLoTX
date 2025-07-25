@@ -8,19 +8,19 @@ from deeplotx.nn.feed_forward import FeedForward
 
 class SelfAttention(BaseNeuralNetwork):
     def __init__(self, feature_dim: int, bias: bool = True, proj_layers: int = 1,
-                 proj_expansion_factor: int | float = 1.25, model_name: str | None = None,
-                 device: str | None = None, dtype: torch.dtype | None = None):
+                 proj_expansion_factor: int | float = 1.25, dropout_rate: float = 0.02,
+                 model_name: str | None = None, device: str | None = None, dtype: torch.dtype | None = None):
         super().__init__(model_name=model_name, device=device, dtype=dtype)
         self._feature_dim = feature_dim
         self.q_proj = FeedForward(feature_dim=self._feature_dim, num_layers=proj_layers,
                                   expansion_factor=proj_expansion_factor,
-                                  bias=bias, device=self.device, dtype=self.dtype)
+                                  bias=bias, dropout_rate=dropout_rate, device=self.device, dtype=self.dtype)
         self.k_proj = FeedForward(feature_dim=self._feature_dim, num_layers=proj_layers,
                                   expansion_factor=proj_expansion_factor,
-                                  bias=bias, device=self.device, dtype=self.dtype)
+                                  bias=bias, dropout_rate=dropout_rate, device=self.device, dtype=self.dtype)
         self.v_proj = FeedForward(feature_dim=self._feature_dim, num_layers=proj_layers,
                                   expansion_factor=proj_expansion_factor,
-                                  bias=bias, device=self.device, dtype=self.dtype)
+                                  bias=bias, dropout_rate=dropout_rate, device=self.device, dtype=self.dtype)
 
     def _attention(self, x: torch.Tensor, mask: torch.Tensor | None = None) -> torch.Tensor:
         q, k = self.q_proj(x), self.k_proj(x)
