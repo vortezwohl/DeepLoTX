@@ -14,7 +14,7 @@ class RecursiveSequential(BaseNeuralNetwork):
                  ffn_bias: bool = True, ffn_dropout_rate: float = 0.05,
                  model_name: str | None = None, device: str | None = None,
                  dtype: torch.dtype | None = None):
-        super().__init__(model_name=model_name, device=device, dtype=dtype)
+        super().__init__(in_features=input_dim, out_features=output_dim, model_name=model_name, device=device, dtype=dtype)
         if hidden_dim is None:
             hidden_dim = input_dim
         self.lstm = nn.LSTM(input_size=input_dim, hidden_size=hidden_dim,
@@ -23,8 +23,8 @@ class RecursiveSequential(BaseNeuralNetwork):
                             dtype=self.dtype)
         self.ffn = FeedForward(feature_dim=hidden_dim * 2, num_layers=ffn_layers, expansion_factor=ffn_expansion_factor,
                                bias=ffn_bias, dropout_rate=ffn_dropout_rate, device=self.device, dtype=self.dtype)
-        self.proj = nn.Linear(in_features=hidden_dim * 2, out_features=output_dim, bias=ffn_bias,
-                              device=self.device, dtype=self.dtype)
+        self.__proj = nn.Linear(in_features=hidden_dim * 2, out_features=output_dim, bias=ffn_bias,
+                                device=self.device, dtype=self.dtype)
 
     def initial_state(self, batch_size: int = 1) -> tuple[torch.Tensor, torch.Tensor]:
         zeros = torch.zeros(self.lstm.num_layers * 2, batch_size, self.lstm.hidden_size, device=self.device, dtype=self.dtype)
@@ -39,7 +39,7 @@ class RecursiveSequential(BaseNeuralNetwork):
         x = x[:, -1, :]
         residual = x
         x = self.ffn(x) + residual
-        x = self.proj(x)
+        x = self.__proj(x)
         return x, (hidden_state, cell_state)
 
     @override

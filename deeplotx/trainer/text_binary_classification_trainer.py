@@ -25,7 +25,7 @@ class TextBinaryClassifierTrainer(BaseTrainer):
               num_epochs: int, learning_rate: float = 2e-6, balancing_dataset: bool = True,
               train_loss_threshold: float = 0.0, valid_loss_threshold: float = 0.0,
               alpha: float = 1e-4, rho: float = 0.2,
-              hidden_dim: int = 256, recursive_layers: int = 2) -> LongContextRecursiveSequential:
+              hidden_dim: int = 256, recursive_layers: int = 2, **kwargs) -> LongContextRecursiveSequential:
         if balancing_dataset:
             min_length = min(len(positive_texts), len(negative_texts))
             positive_texts = positive_texts[:min_length]
@@ -44,15 +44,27 @@ class TextBinaryClassifierTrainer(BaseTrainer):
         valid_dataset = TensorDataset(inputs[train_size:], labels[train_size:])
         self.train_dataset_loader = DataLoader(train_dataset, batch_size=self._batch_size, shuffle=True)
         self.valid_dataset_loader = DataLoader(valid_dataset, batch_size=self._batch_size, shuffle=True)
-
-        if self.model is not None and self.model.fc1.in_features != feature_dim:
+        if self.model is not None and self.model.in_features != feature_dim:
             logger.warning("The dimension of features doesn't match. A new model instance will be created.")
             self.model = None
         if self.model is None:
+            ffn_layers = kwargs.get('ffn_layers', 5)
+            ffn_expansion_factor = kwargs.get('ffn_expansion_factor', 2)
+            ffn_bias = kwargs.get('ffn_bias', True)
+            ffn_dropout_rate = kwargs.get('ffn_dropout_rate', 0.1)
             self.model = LongContextRecursiveSequential(input_dim=feature_dim, output_dim=1,
                                                         hidden_dim=hidden_dim,
                                                         recursive_layers=recursive_layers,
+                                                        ffn_layers=ffn_layers,
+                                                        ffn_expansion_factor=ffn_expansion_factor,
+                                                        ffn_bias=ffn_bias,
+                                                        ffn_dropout_rate=ffn_dropout_rate,
+                                                        attn_proj_layers=kwargs.get('attn_proj_layers', ffn_layers),
+                                                        attn_proj_bias=kwargs.get('attn_proj_bias', ffn_bias),
+                                                        attn_proj_expansion_factor=kwargs.get('attn_proj_expansion_factor', ffn_expansion_factor),
+                                                        attn_proj_dropout_rate=kwargs.get('attn_proj_dropout_rate', ffn_dropout_rate),
                                                         device=self.device, dtype=dtype)
+        logger.debug(f'Training Model: {self.model}')
         loss_function = nn.BCELoss()
         optimizer = optim.Adamax(self.model.parameters(), lr=learning_rate)
         for epoch in range(num_epochs):

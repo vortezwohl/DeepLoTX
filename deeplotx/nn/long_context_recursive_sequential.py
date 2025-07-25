@@ -19,17 +19,16 @@ class LongContextRecursiveSequential(RecursiveSequential):
                          ffn_layers=ffn_layers, ffn_expansion_factor=ffn_expansion_factor,
                          ffn_bias=ffn_bias, ffn_dropout_rate=ffn_dropout_rate,
                          model_name=model_name, device=device, dtype=dtype)
-        self._feature_dim = input_dim
         self.self_attention = SelfAttention(feature_dim=input_dim, bias=kwargs.get('attn_proj_bias', ffn_bias),
                                             proj_layers=kwargs.get('attn_proj_layers', 1),
                                             proj_expansion_factor=kwargs.get('attn_proj_expansion_factor', ffn_expansion_factor),
                                             dropout_rate=kwargs.get('attn_proj_dropout_rate', ffn_dropout_rate))
-        self.proj = nn.Linear(in_features=input_dim * 2, out_features=input_dim,
-                              bias=ffn_bias, device=self.device, dtype=self.dtype)
+        self.__proj = nn.Linear(in_features=input_dim * 2, out_features=input_dim,
+                                bias=ffn_bias, device=self.device, dtype=self.dtype)
 
     @override
     def forward(self, x: torch.Tensor, state: tuple[torch.Tensor, torch.Tensor]) -> tuple[torch.Tensor, tuple[torch.Tensor, torch.Tensor]]:
         x = self.ensure_device_and_dtype(x, device=self.device, dtype=self.dtype)
         x = torch.cat([self.self_attention(x), x], dim=-1)
         x = nn.LayerNorm(normalized_shape=x.shape[-1], eps=1e-9, device=self.device, dtype=self.dtype)(x)
-        return super().forward(self.proj(x), state)
+        return super().forward(self.__proj(x), state)

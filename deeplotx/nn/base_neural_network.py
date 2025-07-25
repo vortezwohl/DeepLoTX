@@ -8,7 +8,8 @@ DEFAULT_SUFFIX = 'dlx'
 
 
 class BaseNeuralNetwork(nn.Module):
-    def __init__(self, model_name: str | None = None, device: str | None = None, dtype: torch.dtype | None = None):
+    def __init__(self, in_features: int, out_features: int, model_name: str | None = None,
+                 device: str | None = None, dtype: torch.dtype | None = None):
         super().__init__()
         self._model_name = model_name \
             if model_name is not None \
@@ -16,6 +17,16 @@ class BaseNeuralNetwork(nn.Module):
         self.device = torch.device(device) if device is not None \
             else torch.device('cuda' if torch.cuda.is_available() else 'cpu')
         self.dtype = dtype if dtype is not None else torch.float32
+        self._in_features = in_features
+        self._out_features = out_features
+
+    @property
+    def in_features(self) -> int:
+        return self._in_features
+
+    @property
+    def out_features(self) -> int:
+        return self._out_features
 
     @staticmethod
     def ensure_device_and_dtype(x: torch.Tensor, device: torch.device, dtype: torch.dtype) -> torch.Tensor:

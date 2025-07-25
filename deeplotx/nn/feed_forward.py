@@ -10,7 +10,7 @@ class FeedForwardUnit(BaseNeuralNetwork):
     def __init__(self, feature_dim: int, expansion_factor: int | float = 2,
                  bias: bool = True, dropout_rate: float = 0.05, model_name: str | None = None,
                  device: str | None = None, dtype: torch.dtype | None = None):
-        super().__init__(model_name=model_name, device=device, dtype=dtype)
+        super().__init__(in_features=feature_dim, out_features=feature_dim, model_name=model_name, device=device, dtype=dtype)
         self._dropout_rate = dropout_rate
         self.fc1 = nn.Linear(feature_dim, int(feature_dim * expansion_factor), bias=bias,
                              device=self.device, dtype=self.dtype)
@@ -39,7 +39,7 @@ class FeedForward(BaseNeuralNetwork):
                  device: str | None = None, dtype: torch.dtype | None = None):
         if num_layers < 1:
             raise ValueError('num_layers cannot be less than 1.')
-        super().__init__(model_name=model_name, device=device, dtype=dtype)
+        super().__init__(in_features=feature_dim, out_features=feature_dim, model_name=model_name, device=device, dtype=dtype)
         self.ffn_layers = nn.ModuleList([FeedForwardUnit(feature_dim=feature_dim,
                                                          expansion_factor=expansion_factor, bias=bias,
                                                          dropout_rate=dropout_rate,

@@ -10,7 +10,8 @@ class SelfAttention(BaseNeuralNetwork):
     def __init__(self, feature_dim: int, bias: bool = True, proj_layers: int = 1,
                  proj_expansion_factor: int | float = 1.5, dropout_rate: float = 0.02,
                  model_name: str | None = None, device: str | None = None, dtype: torch.dtype | None = None):
-        super().__init__(model_name=model_name, device=device, dtype=dtype)
+        super().__init__(in_features=feature_dim, out_features=feature_dim, model_name=model_name,
+                         device=device, dtype=dtype)
         self._feature_dim = feature_dim
         self.q_proj = FeedForward(feature_dim=self._feature_dim, num_layers=proj_layers,
                                   expansion_factor=proj_expansion_factor,
