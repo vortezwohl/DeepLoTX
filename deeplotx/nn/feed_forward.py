@@ -32,7 +32,7 @@ class FeedForwardUnit(BaseNeuralNetwork):
 
 
 class FeedForward(BaseNeuralNetwork):
-    def __init__(self, feature_dim: int, num_layers: int = 1,  expansion_factor: int | float = 2,
+    def __init__(self, feature_dim: int, num_layers: int = 1, expansion_factor: int | float = 2,
                  bias: bool = True, model_name: str | None = None,
                  device: str | None = None, dtype: torch.dtype | None = None):
         if num_layers < 1:
