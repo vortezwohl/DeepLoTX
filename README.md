@@ -145,6 +145,8 @@
 
     ```python
     from deeplotx import (
+        BaseNeuralNetwork,  # 深度神经网络基类
+        FeedForward,  # 前馈神经网络
         LinearRegression,  # 线性回归
         LogisticRegression,  # 逻辑回归 / 二分类 / 多标签分类
         SoftmaxRegression,  # Softmax 回归 / 多分类
@@ -163,38 +165,54 @@
 
     import torch
     from torch import nn
-    
+
     from deeplotx.nn.base_neural_network import BaseNeuralNetwork
-    
-    
-    class LinearRegression(BaseNeuralNetwork):
-        def __init__(self, input_dim: int, output_dim: int, model_name: str | None = None,
-                     device: str | None = None, dtype: torch.dtype | None = None):
-            super().__init__(model_name=model_name, device=device, dtype=dtype)
-            self.fc1 = nn.Linear(input_dim, 1024, device=self.device, dtype=self.dtype)
-            self.fc1_to_fc4_res = nn.Linear(1024, 64, device=self.device, dtype=self.dtype)
-            self.fc2 = nn.Linear(1024, 768, device=self.device, dtype=self.dtype)
-            self.fc3 = nn.Linear(768, 128, device=self.device, dtype=self.dtype)
-            self.fc4 = nn.Linear(128, 64, device=self.device, dtype=self.dtype)
-            self.fc5 = nn.Linear(64, output_dim, device=self.device, dtype=self.dtype)
-            self.parametric_relu_1 = nn.PReLU(num_parameters=1, init=5e-3, device=self.device, dtype=self.dtype)
-            self.parametric_relu_2 = nn.PReLU(num_parameters=1, init=5e-3, device=self.device, dtype=self.dtype)
-            self.parametric_relu_3 = nn.PReLU(num_parameters=1, init=5e-3, device=self.device, dtype=self.dtype)
-            self.parametric_relu_4 = nn.PReLU(num_parameters=1, init=5e-3, device=self.device, dtype=self.dtype)
-    
+
+
+    class FeedForwardUnit(BaseNeuralNetwork):
+        def __init__(self, feature_dim: int, expansion_factor: int | float = 2,
+                    bias: bool = True, dropout_rate: float = 0.05, model_name: str | None = None,
+                    device: str | None = None, dtype: torch.dtype | None = None):
+            super().__init__(in_features=feature_dim, out_features=feature_dim, model_name=model_name, device=device, dtype=dtype)
+            self._dropout_rate = dropout_rate
+            self.fc1 = nn.Linear(feature_dim, int(feature_dim * expansion_factor), bias=bias,
+                                device=self.device, dtype=self.dtype)
+            self.fc2 = nn.Linear(int(feature_dim * expansion_factor), feature_dim, bias=bias,
+                                device=self.device, dtype=self.dtype)
+            self.parametric_relu_1 = nn.PReLU(num_parameters=1, init=5e-3,
+                                            device=self.device, dtype=self.dtype)
+            self.layer_norm = nn.LayerNorm(normalized_shape=self.fc1.in_features, eps=1e-9,
+                                        device=self.device, dtype=self.dtype)
+
         @override
-        def forward(self, x) -> torch.Tensor:
+        def forward(self, x: torch.Tensor) -> torch.Tensor:
             x = self.ensure_device_and_dtype(x, device=self.device, dtype=self.dtype)
-            fc1_out = self.parametric_relu_1(self.fc1(x))
-            x = nn.LayerNorm(normalized_shape=1024, eps=1e-9, device=self.device, dtype=self.dtype)(fc1_out)
-            x = torch.dropout(x, p=0.2, train=self.training)
-            x = self.parametric_relu_2(self.fc2(x))
-            x = nn.LayerNorm(normalized_shape=768, eps=1e-9, device=self.device, dtype=self.dtype)(x)
-            x = torch.dropout(x, p=0.2, train=self.training)
-            x = self.parametric_relu_3(self.fc3(x))
-            x = torch.dropout(x, p=0.2, train=self.training)
-            x = self.parametric_relu_4(self.fc4(x)) + self.fc1_to_fc4_res(fc1_out)
-            x = self.fc5(x)
+            residual = x
+            x = self.layer_norm(x)
+            x = self.fc1(x)
+            x = self.parametric_relu_1(x)
+            if self._dropout_rate > .0:
+                x = torch.dropout(x, p=self._dropout_rate, train=self.training)
+            return self.fc2(x) + residual
+
+
+    class FeedForward(BaseNeuralNetwork):
+        def __init__(self, feature_dim: int, num_layers: int = 1, expansion_factor: int | float = 2,
+                    bias: bool = True, dropout_rate: float = 0.05, model_name: str | None = None,
+                    device: str | None = None, dtype: torch.dtype | None = None):
+            if num_layers < 1:
+                raise ValueError('num_layers cannot be less than 1.')
+            super().__init__(in_features=feature_dim, out_features=feature_dim, model_name=model_name, device=device, dtype=dtype)
+            self.ffn_layers = nn.ModuleList([FeedForwardUnit(feature_dim=feature_dim,
+                                                            expansion_factor=expansion_factor, bias=bias,
+                                                            dropout_rate=dropout_rate,
+                                                            device=self.device, dtype=self.dtype)] * num_layers)
+
+        @override
+        def forward(self, x: torch.Tensor) -> torch.Tensor:
+            x = self.ensure_device_and_dtype(x, device=self.device, dtype=self.dtype)
+            for ffn in self.ffn_layers:
+                x = ffn(x)
             return x
     ```
 
@@ -204,29 +222,34 @@
     from typing_extensions import override
 
     import torch
-    from torch import nn, softmax
 
     from deeplotx.nn.base_neural_network import BaseNeuralNetwork
+    from deeplotx.nn.feed_forward import FeedForward
 
 
     class SelfAttention(BaseNeuralNetwork):
-        def __init__(self, feature_dim: int, model_name: str | None = None,
-                    device: str | None = None, dtype: torch.dtype | None = None):
-            super().__init__(model_name=model_name, device=device, dtype=dtype)
+        def __init__(self, feature_dim: int, bias: bool = True, proj_layers: int = 1,
+                    proj_expansion_factor: int | float = 1.5, dropout_rate: float = 0.02,
+                    model_name: str | None = None, device: str | None = None, dtype: torch.dtype | None = None):
+            super().__init__(in_features=feature_dim, out_features=feature_dim, model_name=model_name,
+                            device=device, dtype=dtype)
             self._feature_dim = feature_dim
-            self.q_proj = nn.Linear(in_features=self._feature_dim, out_features=self._feature_dim,
-                                    bias=True, device=self.device, dtype=self.dtype)
-            self.k_proj = nn.Linear(in_features=self._feature_dim, out_features=self._feature_dim,
-                                    bias=True, device=self.device, dtype=self.dtype)
-            self.v_proj = nn.Linear(in_features=self._feature_dim, out_features=self._feature_dim,
-                                    bias=True, device=self.device, dtype=self.dtype)
+            self.q_proj = FeedForward(feature_dim=self._feature_dim, num_layers=proj_layers,
+                                    expansion_factor=proj_expansion_factor,
+                                    bias=bias, dropout_rate=dropout_rate, device=self.device, dtype=self.dtype)
+            self.k_proj = FeedForward(feature_dim=self._feature_dim, num_layers=proj_layers,
+                                    expansion_factor=proj_expansion_factor,
+                                    bias=bias, dropout_rate=dropout_rate, device=self.device, dtype=self.dtype)
+            self.v_proj = FeedForward(feature_dim=self._feature_dim, num_layers=proj_layers,
+                                    expansion_factor=proj_expansion_factor,
+                                    bias=bias, dropout_rate=dropout_rate, device=self.device, dtype=self.dtype)
 
         def _attention(self, x: torch.Tensor, mask: torch.Tensor | None = None) -> torch.Tensor:
             q, k = self.q_proj(x), self.k_proj(x)
             attn = torch.matmul(q, k.transpose(-2, -1))
             attn = attn / (self._feature_dim ** 0.5)
             attn = attn.masked_fill(mask == 0, -1e9) if mask is not None else attn
-            return softmax(attn, dim=-1)
+            return torch.softmax(attn, dim=-1)
 
         @override
         def forward(self, x: torch.Tensor, mask: torch.Tensor | None = None) -> torch.Tensor:
