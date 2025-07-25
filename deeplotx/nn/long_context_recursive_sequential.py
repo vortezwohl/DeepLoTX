@@ -10,15 +10,22 @@ from deeplotx.nn.self_attention import SelfAttention
 class LongContextRecursiveSequential(RecursiveSequential):
     def __init__(self, input_dim: int, output_dim: int,
                  hidden_dim: int | None = None, recursive_layers: int = 2,
+                 ffn_layers: int = 1, ffn_expansion_factor: int | float = 2,
+                 ffn_bias: bool = True, ffn_dropout_rate: float = 0.05,
                  model_name: str | None = None, device: str | None = None,
-                 dtype: torch.dtype | None = None):
+                 dtype: torch.dtype | None = None, **kwargs):
         super().__init__(input_dim=input_dim, output_dim=output_dim,
                          hidden_dim=hidden_dim, recursive_layers=recursive_layers,
+                         ffn_layers=ffn_layers, ffn_expansion_factor=ffn_expansion_factor,
+                         ffn_bias=ffn_bias, ffn_dropout_rate=ffn_dropout_rate,
                          model_name=model_name, device=device, dtype=dtype)
         self._feature_dim = input_dim
-        self.self_attention = SelfAttention(feature_dim=input_dim)
+        self.self_attention = SelfAttention(feature_dim=input_dim, bias=kwargs.get('attn_proj_bias', ffn_bias),
+                                            proj_layers=kwargs.get('attn_proj_layers', 1),
+                                            proj_expansion_factor=kwargs.get('attn_proj_expansion_factor', ffn_expansion_factor),
+                                            dropout_rate=kwargs.get('attn_proj_dropout_rate', ffn_dropout_rate))
         self.proj = nn.Linear(in_features=input_dim * 2, out_features=input_dim,
-                              bias=True, device=self.device, dtype=self.dtype)
+                              bias=ffn_bias, device=self.device, dtype=self.dtype)
 
     @override
     def forward(self, x: torch.Tensor, state: tuple[torch.Tensor, torch.Tensor]) -> tuple[torch.Tensor, tuple[torch.Tensor, torch.Tensor]]:

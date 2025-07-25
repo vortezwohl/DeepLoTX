@@ -4,12 +4,14 @@ import torch
 from torch import nn
 
 from deeplotx.nn.base_neural_network import BaseNeuralNetwork
-from deeplotx.nn import LinearRegression
+from deeplotx.nn.feed_forward import FeedForward
 
 
 class RecursiveSequential(BaseNeuralNetwork):
     def __init__(self, input_dim: int, output_dim: int,
                  hidden_dim: int | None = None, recursive_layers: int = 2,
+                 ffn_layers: int = 1, ffn_expansion_factor: int | float = 2,
+                 ffn_bias: bool = True, ffn_dropout_rate: float = 0.05,
                  model_name: str | None = None, device: str | None = None,
                  dtype: torch.dtype | None = None):
         super().__init__(model_name=model_name, device=device, dtype=dtype)
@@ -19,8 +21,10 @@ class RecursiveSequential(BaseNeuralNetwork):
                             num_layers=recursive_layers, batch_first=True,
                             bias=True, bidirectional=True, device=self.device,
                             dtype=self.dtype)
-        self.regressive_head = LinearRegression(input_dim=hidden_dim * 2, output_dim=output_dim,
-                                                device=self.device, dtype=self.dtype)
+        self.ffn = FeedForward(feature_dim=hidden_dim * 2, num_layers=ffn_layers, expansion_factor=ffn_expansion_factor,
+                               bias=ffn_bias, dropout_rate=ffn_dropout_rate, device=self.device, dtype=self.dtype)
+        self.proj = nn.Linear(in_features=hidden_dim * 2, out_features=output_dim, bias=ffn_bias,
+                              device=self.device, dtype=self.dtype)
 
     def initial_state(self, batch_size: int = 1) -> tuple[torch.Tensor, torch.Tensor]:
         zeros = torch.zeros(self.lstm.num_layers * 2, batch_size, self.lstm.hidden_size, device=self.device, dtype=self.dtype)
@@ -32,7 +36,10 @@ class RecursiveSequential(BaseNeuralNetwork):
         state = (self.ensure_device_and_dtype(state[0], device=self.device, dtype=self.dtype),
                  self.ensure_device_and_dtype(state[1], device=self.device, dtype=self.dtype))
         x, (hidden_state, cell_state) = self.lstm(x, state)
-        x = self.regressive_head(x[:, -1, :])
+        x = x[:, -1, :]
+        residual = x
+        x = self.ffn(x) + residual
+        x = self.proj(x)
         return x, (hidden_state, cell_state)
 
     @override

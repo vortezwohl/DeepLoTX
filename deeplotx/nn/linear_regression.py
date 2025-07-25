@@ -9,7 +9,7 @@ from deeplotx.nn.feed_forward import FeedForward
 
 class LinearRegression(BaseNeuralNetwork):
     def __init__(self, input_dim: int, output_dim: int, num_layers: int = 1,
-                 expansion_factor: int | float = 1.25, bias: bool = True, dropout_rate: float = 0.1,
+                 expansion_factor: int | float = 1.5, bias: bool = True, dropout_rate: float = 0.1,
                  model_name: str | None = None, device: str | None = None, dtype: torch.dtype | None = None):
         super().__init__(model_name=model_name, device=device, dtype=dtype)
         self.ffn = FeedForward(feature_dim=input_dim, num_layers=num_layers, expansion_factor=expansion_factor,

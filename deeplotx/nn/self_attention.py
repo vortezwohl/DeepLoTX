@@ -8,7 +8,7 @@ from deeplotx.nn.feed_forward import FeedForward
 
 class SelfAttention(BaseNeuralNetwork):
     def __init__(self, feature_dim: int, bias: bool = True, proj_layers: int = 1,
-                 proj_expansion_factor: int | float = 1.25, dropout_rate: float = 0.02,
+                 proj_expansion_factor: int | float = 1.5, dropout_rate: float = 0.02,
                  model_name: str | None = None, device: str | None = None, dtype: torch.dtype | None = None):
         super().__init__(model_name=model_name, device=device, dtype=dtype)
         self._feature_dim = feature_dim
