@@ -15,12 +15,13 @@ logger = logging.getLogger('deeplotx.embedding')
 class LongTextEncoder(Encoder):
     def __init__(self, max_length: int, chunk_size: int = 448,
                  overlapping: int = 32, model_name_or_path: str = DEFAULT_BERT,
-                 cache_capacity: int = 64, device: str | None = None):
+                 cache_capacity: int = 64, max_workers: int = 8, device: str | None = None):
         super().__init__(model_name_or_path=model_name_or_path, device=device)
         self._max_length = max_length
         self._chunk_size = chunk_size
         self._overlapping = overlapping
         self._cache = LRUCache(capacity=cache_capacity)
+        self._worker_group = ThreadPool(max_workers=max_workers)
 
     def __chunk_embedding(self, idx: int, x: torch.Tensor, mask: torch.Tensor) -> tuple[int, torch.Tensor]:
         return idx, super().forward(x, attention_mask=mask)
@@ -63,7 +64,7 @@ class LongTextEncoder(Encoder):
             _tmp_right = (i + 1) * self._chunk_size + self._overlapping
             chunks.append((i, torch.tensor([_text_to_input_ids[_tmp_left: _tmp_right]], dtype=torch.int, device=self.device),
                            torch.tensor([_text_to_input_ids_att_mask[_tmp_left: _tmp_right]], dtype=torch.int, device=self.device)))
-        embeddings = list(ThreadPool(max_workers=min(num_chunks + 1, 8)).map(self.__chunk_embedding, chunks))
+        embeddings = list(self._worker_group.map(self.__chunk_embedding, chunks))
         embeddings = sorted([x.returns for x in embeddings], key=lambda x: x[0], reverse=False)
         fin_embedding = [x[1] for x in embeddings]
         # write cache
