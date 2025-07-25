@@ -1,6 +1,7 @@
 import logging
 import os
 import math
+from requests.exceptions import ConnectTimeout
 
 import torch
 from torch import nn
@@ -18,10 +19,20 @@ class Encoder(nn.Module):
         super().__init__()
         self.device = torch.device(device) if device is not None \
             else torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-        self.tokenizer = AutoTokenizer.from_pretrained(pretrained_model_name_or_path=model_name_or_path,
-                                                       cache_dir=CACHE_PATH, _from_auto=True)
-        self.encoder = AutoModel.from_pretrained(pretrained_model_name_or_path=model_name_or_path,
-                                                 cache_dir=CACHE_PATH, _from_auto=True).to(self.device)
+        try:
+            self.tokenizer = AutoTokenizer.from_pretrained(pretrained_model_name_or_path=model_name_or_path,
+                                                           cache_dir=CACHE_PATH, _from_auto=True,
+                                                           trust_remote_code=True)
+            self.encoder = AutoModel.from_pretrained(pretrained_model_name_or_path=model_name_or_path,
+                                                     cache_dir=CACHE_PATH, _from_auto=True,
+                                                     trust_remote_code=True).to(self.device)
+        except ConnectTimeout:
+            self.tokenizer = AutoTokenizer.from_pretrained(pretrained_model_name_or_path=model_name_or_path,
+                                                           cache_dir=CACHE_PATH, _from_auto=True,
+                                                           trust_remote_code=True, local_files_only=True)
+            self.encoder = AutoModel.from_pretrained(pretrained_model_name_or_path=model_name_or_path,
+                                                     cache_dir=CACHE_PATH, _from_auto=True,
+                                                     trust_remote_code=True, local_files_only=True).to(self.device)
         self.embed_dim = self.encoder.config.max_position_embeddings
         logger.debug(f'{Encoder.__name__} initialized on device: {self.device}.')
 
