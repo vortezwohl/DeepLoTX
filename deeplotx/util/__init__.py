@@ -1,2 +1,2 @@
-from .hash import md5, sha1
+from .hash import md5, sha1, sha256, sha512
 from .read_file import read_file, get_files
