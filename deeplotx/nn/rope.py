@@ -27,7 +27,7 @@ class RoPE(BaseNeuralNetwork):
         return torch.cat((- _t[..., self._num_groups:], _t[..., :self._num_groups]), dim=-1)
 
     @override
-    def forward(self, x: torch.Tensor, mask: torch.Tensor | None = None) -> torch.Tensor:
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
         x = self.ensure_device_and_dtype(x, device=self.device, dtype=self.dtype)
         *other_dims, seq_len, feature_dim = x.shape
         assert feature_dim == self.in_features, f"feature_dim of x doesn't match with defined feature_dim {self.in_features}."
