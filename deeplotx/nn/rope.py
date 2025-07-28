@@ -6,7 +6,7 @@ from deeplotx.nn.base_neural_network import BaseNeuralNetwork
 
 
 class RoPE(BaseNeuralNetwork):
-    def __init__(self, feature_dim: int, base: int = 10000, device: str | None = None, dtype: torch.dtype | None = torch.float32):
+    def __init__(self, feature_dim: int, base: int = 10000, device: str | None = None, dtype: torch.dtype = torch.float32):
         super().__init__(in_features=feature_dim, out_features=feature_dim, model_name=None,
                          device=device, dtype=dtype)
         assert feature_dim % 2 == 0, f'feature_dim must be divisible by 2.'
