@@ -12,6 +12,7 @@ from .nn import (
     SoftmaxRegression,
     RecursiveSequential,
     LongContextRecursiveSequential,
+    RoPE,
     SelfAttention,
     AutoRegression,
     LongContextAutoRegression

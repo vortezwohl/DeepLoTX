@@ -4,15 +4,18 @@ import torch
 
 from deeplotx.nn.base_neural_network import BaseNeuralNetwork
 
+DEFAULT_THETA = 10_000
+
 
 class RoPE(BaseNeuralNetwork):
-    def __init__(self, feature_dim: int, base: int = 10000, device: str | None = None, dtype: torch.dtype = torch.float32):
+    def __init__(self, feature_dim: int, theta: int = DEFAULT_THETA,
+                 device: str | None = None, dtype: torch.dtype = torch.float32):
         super().__init__(in_features=feature_dim, out_features=feature_dim, model_name=None,
                          device=device, dtype=dtype)
         assert feature_dim % 2 == 0, f'feature_dim must be divisible by 2.'
-        self._base = base
+        self._theta = theta
         self._num_groups = feature_dim // 2
-        self._inv_freq = 1.0 / (base ** (torch.arange(start=0, end=self._num_groups, step=1).float() / self._num_groups))
+        self._inv_freq = 1.0 / (theta ** (torch.arange(start=0, end=self._num_groups, step=1).float() / self._num_groups))
         self.register_buffer('inv_freq', self._inv_freq)
 
     @property
@@ -20,8 +23,8 @@ class RoPE(BaseNeuralNetwork):
         return self._dim
 
     @property
-    def base(self):
-        return self._base
+    def theta(self):
+        return self._theta
 
     def rotate_half(self, _t: torch.Tensor) -> torch.Tensor:
         return torch.cat((- _t[..., self._num_groups:], _t[..., :self._num_groups]), dim=-1)
