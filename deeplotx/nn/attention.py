@@ -41,8 +41,7 @@ class Attention(BaseNeuralNetwork):
     @override
     def forward(self, x: torch.Tensor, y: torch.Tensor | None = None, mask: torch.Tensor | None = None) -> torch.Tensor:
         x = self.ensure_device_and_dtype(x, device=self.device, dtype=self.dtype)
-        if y is None:
-            y = x
+        y = x if y is None else self.ensure_device_and_dtype(y, device=self.device, dtype=self.dtype)
         if mask is not None:
             mask = self.ensure_device_and_dtype(mask, device=self.device, dtype=self.dtype)
         v = self.v_proj(y)
