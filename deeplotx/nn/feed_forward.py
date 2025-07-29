@@ -12,13 +12,13 @@ class FeedForwardUnit(BaseNeuralNetwork):
                  device: str | None = None, dtype: torch.dtype | None = None):
         super().__init__(in_features=feature_dim, out_features=feature_dim, model_name=model_name, device=device, dtype=dtype)
         self._dropout_rate = dropout_rate
-        self.fc1 = nn.Linear(feature_dim, int(feature_dim * expansion_factor), bias=bias,
-                             device=self.device, dtype=self.dtype)
-        self.fc2 = nn.Linear(int(feature_dim * expansion_factor), feature_dim, bias=bias,
-                             device=self.device, dtype=self.dtype)
-        self.parametric_relu_1 = nn.PReLU(num_parameters=1, init=5e-3,
-                                          device=self.device, dtype=self.dtype)
-        self.layer_norm = nn.LayerNorm(normalized_shape=self.fc1.in_features, eps=1e-9,
+        self.up_proj = nn.Linear(in_features=feature_dim, out_features=int(feature_dim * expansion_factor),
+                                 bias=bias, device=self.device, dtype=self.dtype)
+        self.down_proj = nn.Linear(in_features=int(feature_dim * expansion_factor), out_features=feature_dim,
+                                   bias=bias, device=self.device, dtype=self.dtype)
+        self.parametric_relu = nn.PReLU(num_parameters=1, init=5e-3,
+                                        device=self.device, dtype=self.dtype)
+        self.layer_norm = nn.LayerNorm(normalized_shape=self.up_proj.in_features, eps=1e-9,
                                        device=self.device, dtype=self.dtype)
 
     @override
@@ -26,11 +26,11 @@ class FeedForwardUnit(BaseNeuralNetwork):
         x = self.ensure_device_and_dtype(x, device=self.device, dtype=self.dtype)
         residual = x
         x = self.layer_norm(x)
-        x = self.fc1(x)
-        x = self.parametric_relu_1(x)
+        x = self.up_proj(x)
+        x = self.parametric_relu(x)
         if self._dropout_rate > .0:
             x = torch.dropout(x, p=self._dropout_rate, train=self.training)
-        return self.fc2(x) + residual
+        return self.down_proj(x) + residual
 
 
 class FeedForward(BaseNeuralNetwork):
