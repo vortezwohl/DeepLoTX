@@ -134,7 +134,7 @@ class BaseNeuralNetwork(nn.Module):
                      f'Dtype: {self.dtype}\n'
                      f'Total_Parameters: {total_param}\n'
                      f'Trainable_Parameters: {trainable_param}\n'
-                     f'Non-Trainable_Parameters: {non_trainable_param}\n'
+                     f'NonTrainable_Parameters: {non_trainable_param}\n'
                      f'{_splitter_2}'
                      f'\n{formatted}\n{_splitter_1}')
         return formatted
