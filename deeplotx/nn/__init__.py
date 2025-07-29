@@ -7,6 +7,7 @@ from .recursive_sequential import RecursiveSequential
 from .long_context_recursive_sequential import LongContextRecursiveSequential
 from .rope import RoPE
 from .attention import Attention
+from .multi_head_attention import MultiHeadAttention
 from .roformer_encoder import RoFormerEncoder
 from .auto_regression import AutoRegression
 from .long_context_auto_regression import LongContextAutoRegression

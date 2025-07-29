@@ -13,6 +13,7 @@ from .nn import (
     LongContextRecursiveSequential,
     RoPE,
     Attention,
+    MultiHeadAttention,
     RoFormerEncoder,
     AutoRegression,
     LongContextAutoRegression
