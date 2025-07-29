@@ -22,6 +22,9 @@ class LongContextRecursiveSequential(RecursiveSequential):
                                                                 ffn_layers=kwargs.get('encoder_ffn_layers', ffn_layers),
                                                                 ffn_expansion_factor=kwargs.get('encoder_ffn_expansion_factor', ffn_expansion_factor),
                                                                 dropout_rate=kwargs.get('encoder_dropout_rate', dropout_rate),
+                                                                attn_ffn_layers=kwargs.get('attn_ffn_layers', 1),
+                                                                attn_expansion_factor=kwargs.get('attn_expansion_factor', ffn_expansion_factor),
+                                                                attn_dropout_rate=kwargs.get('attn_dropout_rate', dropout_rate),
                                                                 theta=kwargs.get('theta', DEFAULT_THETA),
                                                                 device=self.device, dtype=self.dtype)] * encoder_layers)
 
