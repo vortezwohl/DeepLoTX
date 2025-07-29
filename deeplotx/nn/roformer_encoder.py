@@ -34,6 +34,6 @@ class RoFormerEncoder(BaseNeuralNetwork):
         x = self.ensure_device_and_dtype(x, device=self.device, dtype=self.dtype)
         if mask is not None:
             mask = self.ensure_device_and_dtype(mask, device=self.device, dtype=self.dtype)
-        attn = self.self_attention(self.layer_norm(x), mask)
+        attn = self.self_attention(x=self.layer_norm(x), y=None, mask=mask)
         x = torch.concat([attn, x], dim=-1)
         return self.__proj(self.ffn(x))
