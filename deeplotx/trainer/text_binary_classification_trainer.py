@@ -6,6 +6,7 @@ from torch import nn, optim
 from torch.utils.data import DataLoader, TensorDataset
 
 from deeplotx.encoder.long_text_encoder import LongTextEncoder
+from deeplotx.nn.attention import DEFAULT_THETA
 from deeplotx.nn.long_context_recursive_sequential import LongContextRecursiveSequential
 from deeplotx.trainer.base_trainer import BaseTrainer
 
@@ -24,8 +25,8 @@ class TextBinaryClassifierTrainer(BaseTrainer):
     def train(self, positive_texts: list[str], negative_texts: list[str],
               num_epochs: int, learning_rate: float = 2e-6, balancing_dataset: bool = True,
               train_loss_threshold: float = 0.0, valid_loss_threshold: float = 0.0,
-              alpha: float = 1e-4, rho: float = 0.2,
-              hidden_dim: int = 256, recursive_layers: int = 2, **kwargs) -> LongContextRecursiveSequential:
+              alpha: float = 1e-4, rho: float = 0.2, encoder_layers: int = 4, attn_heads: int = 6,
+              recursive_layers: int = 2, recursive_hidden_dim: int = 256, **kwargs) -> LongContextRecursiveSequential:
         if balancing_dataset:
             min_length = min(len(positive_texts), len(negative_texts))
             positive_texts = positive_texts[:min_length]
@@ -50,20 +51,23 @@ class TextBinaryClassifierTrainer(BaseTrainer):
         if self.model is None:
             ffn_layers = kwargs.get('ffn_layers', 5)
             ffn_expansion_factor = kwargs.get('ffn_expansion_factor', 2)
-            ffn_bias = kwargs.get('ffn_bias', True)
-            ffn_dropout_rate = kwargs.get('ffn_dropout_rate', 0.1)
-            self.model = LongContextRecursiveSequential(input_dim=feature_dim, output_dim=1,
-                                                        hidden_dim=hidden_dim,
-                                                        recursive_layers=recursive_layers,
-                                                        ffn_layers=ffn_layers,
-                                                        ffn_expansion_factor=ffn_expansion_factor,
-                                                        ffn_bias=ffn_bias,
-                                                        ffn_dropout_rate=ffn_dropout_rate,
-                                                        attn_proj_layers=kwargs.get('attn_proj_layers', ffn_layers),
-                                                        attn_proj_bias=kwargs.get('attn_proj_bias', ffn_bias),
-                                                        attn_proj_expansion_factor=kwargs.get('attn_proj_expansion_factor', ffn_expansion_factor),
-                                                        attn_proj_dropout_rate=kwargs.get('attn_proj_dropout_rate', ffn_dropout_rate),
-                                                        device=self.device, dtype=dtype)
+            bias = kwargs.get('bias', True)
+            dropout_rate = kwargs.get('dropout_rate', 0.1)
+            encoder_ffn_layers = kwargs.get('encoder_ffn_layers', ffn_layers)
+            encoder_expansion_factor = kwargs.get('encoder_expansion_factor', ffn_expansion_factor)
+            encoder_dropout_rate = kwargs.get('encoder_dropout_rate', dropout_rate)
+            attn_ffn_layers = kwargs.get('attn_ffn_layers', 1)
+            attn_expansion_factor = kwargs.get('attn_expansion_factor', ffn_expansion_factor)
+            attn_dropout_rate = kwargs.get('attn_dropout_rate', dropout_rate)
+            theta = kwargs.get('theta', DEFAULT_THETA)
+            self.model = LongContextRecursiveSequential(input_dim=feature_dim, output_dim=1, bias=bias,
+                                                        encoder_layers=encoder_layers, attn_heads=attn_heads,
+                                                        recursive_layers=recursive_layers, recursive_hidden_dim=recursive_hidden_dim,
+                                                        ffn_layers=ffn_layers, ffn_expansion_factor=ffn_expansion_factor, dropout_rate=dropout_rate,
+                                                        encoder_ffn_layers=encoder_ffn_layers, encoder_expansion_factor=encoder_expansion_factor,
+                                                        encoder_dropout_rate=encoder_dropout_rate, attn_ffn_layers=attn_ffn_layers,
+                                                        attn_expansion_factor=attn_expansion_factor, attn_dropout_rate=attn_dropout_rate,
+                                                        theta=theta).initialize_weights()
         logger.debug(f'Training Model: {self.model}')
         loss_function = nn.BCELoss()
         optimizer = optim.Adamax(self.model.parameters(), lr=learning_rate)
