@@ -43,7 +43,7 @@ class FeedForward(BaseNeuralNetwork):
         self.ffn_layers = nn.ModuleList([FeedForwardUnit(feature_dim=feature_dim,
                                                          expansion_factor=expansion_factor, bias=bias,
                                                          dropout_rate=dropout_rate,
-                                                         device=self.device, dtype=self.dtype)] * num_layers)
+                                                         device=self.device, dtype=self.dtype) for _ in range(num_layers)])
 
     @override
     def forward(self, x: torch.Tensor) -> torch.Tensor:

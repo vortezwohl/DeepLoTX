@@ -26,7 +26,7 @@ class LongContextRecursiveSequential(RecursiveSequential):
                                                                 attn_expansion_factor=kwargs.get('attn_expansion_factor', ffn_expansion_factor),
                                                                 attn_dropout_rate=kwargs.get('attn_dropout_rate', dropout_rate),
                                                                 theta=kwargs.get('theta', DEFAULT_THETA),
-                                                                device=self.device, dtype=self.dtype)] * encoder_layers)
+                                                                device=self.device, dtype=self.dtype) for _ in range(encoder_layers)])
 
     @override
     def forward(self, x: torch.Tensor, state: tuple[torch.Tensor, torch.Tensor]) -> tuple[torch.Tensor, tuple[torch.Tensor, torch.Tensor]]:
