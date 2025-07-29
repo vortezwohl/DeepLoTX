@@ -68,7 +68,7 @@ class TextBinaryClassifierTrainer(BaseTrainer):
                                                         encoder_dropout_rate=encoder_dropout_rate, attn_ffn_layers=attn_ffn_layers,
                                                         attn_expansion_factor=attn_expansion_factor, attn_dropout_rate=attn_dropout_rate,
                                                         theta=theta).initialize_weights()
-        logger.debug(f'Training Model: {self.model}')
+        logger.debug(f'Training Model: \n{self.model}')
         loss_function = nn.BCELoss()
         optimizer = optim.Adamax(self.model.parameters(), lr=learning_rate)
         for epoch in range(num_epochs):
