@@ -17,6 +17,7 @@ class LongTextEncoder(Encoder):
                  overlapping: int = 32, model_name_or_path: str = DEFAULT_BERT,
                  cache_capacity: int = 64, max_workers: int = 8, device: str | None = None):
         super().__init__(model_name_or_path=model_name_or_path, device=device)
+        assert overlapping < chunk_size, f'overlapping ({overlapping}) must be less than chunk size ({chunk_size}).'
         self._max_length = max_length
         self._chunk_size = chunk_size
         self._overlapping = overlapping
