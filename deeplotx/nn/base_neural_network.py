@@ -60,6 +60,21 @@ class BaseNeuralNetwork(nn.Module):
                     pass
         return self
 
+    def size(self) -> dict:
+        total_params = trainable_params = non_trainable_params = 0
+        for param in self.parameters():
+            params = param.numel()
+            total_params += params
+            if param.requires_grad:
+                trainable_params += params
+            else:
+                non_trainable_params += params
+        return {
+            'total': total_params,
+            'trainable': trainable_params,
+            'non_trainable': non_trainable_params
+        }
+
     def l1(self, _lambda: float = 1e-4) -> torch.Tensor:
         def _l1() -> torch.Tensor:
             l2_reg = torch.tensor(0., device=self.device, dtype=self.dtype)
@@ -101,3 +116,25 @@ class BaseNeuralNetwork(nn.Module):
         model_file_name = f'{model_name}.{_suffix}' if model_name is not None else f'{self._model_name}.{_suffix}'
         self.load_state_dict(torch.load(os.path.join(model_dir, model_file_name), map_location=self.device, weights_only=True))
         return self
+
+    def __str__(self):
+        formatted = super().__str__()
+        _line_len = len([sorted(formatted.splitlines(), key=lambda _: len(_), reverse=True)][0])
+        _splitter_1 = '=' * (_line_len + 10)
+        _splitter_2 = '-' * (_line_len + 10)
+        _size = self.size()
+        total_param = _size['total']
+        trainable_param = _size['trainable']
+        non_trainable_param = _size['non_trainable']
+        formatted = (f'{_splitter_1}\n'
+                     f'Model_Name: {self._model_name}\n'
+                     f'In_Features: {self.in_features}\n'
+                     f'Out_Features: {self.out_features}\n'
+                     f'Device: {self.device}\n'
+                     f'Dtype: {self.dtype}\n'
+                     f'Total_Parameters: {total_param}\n'
+                     f'Trainable_Parameters: {trainable_param}\n'
+                     f'Non-Trainable_Parameters: {non_trainable_param}\n'
+                     f'{_splitter_2}'
+                     f'\n{formatted}\n{_splitter_1}')
+        return formatted
