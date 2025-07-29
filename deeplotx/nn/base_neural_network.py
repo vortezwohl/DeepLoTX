@@ -3,6 +3,7 @@ from abc import abstractmethod
 
 import torch
 from torch import nn
+from torch.nn import init
 
 DEFAULT_SUFFIX = 'dlx'
 
@@ -35,6 +36,29 @@ class BaseNeuralNetwork(nn.Module):
         if x.dtype != dtype:
             x = x.to(dtype)
         return x
+
+    def initialize_weights(self):
+        for m in self.modules():
+            match m.__class__:
+                case nn.Linear:
+                    init.kaiming_normal_(m.weight, mode='fan_in', nonlinearity='leaky_relu')
+                    if m.bias is not None:
+                        init.constant_(m.bias, 0)
+                case nn.BatchNorm2d | nn.BatchNorm1d | nn.BatchNorm3d:
+                    init.constant_(m.weight, 1)
+                    init.constant_(m.bias, 0)
+                case nn.LSTM | nn.GRU:
+                    for name, param in m.named_parameters():
+                        _tmp_name = name.lower()
+                        if 'weight_ih' in _tmp_name:
+                            init.kaiming_normal_(param, mode='fan_in', nonlinearity='sigmoid')
+                        elif 'weight_hh' in _tmp_name:
+                            init.orthogonal_(param)
+                        elif 'bias' in _tmp_name:
+                            init.constant_(param, 0)
+                case _:
+                    pass
+        return self
 
     def l1(self, _lambda: float = 1e-4) -> torch.Tensor:
         def _l1() -> torch.Tensor:
