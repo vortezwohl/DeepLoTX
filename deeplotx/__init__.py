@@ -14,6 +14,7 @@ from .nn import (
     LongContextRecursiveSequential,
     RoPE,
     SelfAttention,
+    RoFormerEncoder,
     AutoRegression,
     LongContextAutoRegression
 )
