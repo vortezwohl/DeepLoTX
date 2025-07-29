@@ -36,7 +36,7 @@ class Attention(BaseNeuralNetwork):
         attn = torch.matmul(q, k.transpose(-2, -1))
         attn = attn / (self._feature_dim ** 0.5)
         attn = attn.masked_fill(mask == 0, -1e9) if mask is not None else attn
-        return torch.softmax(attn, dim=-1)
+        return torch.softmax(attn, dtype=self.dtype, dim=-1)
 
     @override
     def forward(self, x: torch.Tensor, y: torch.Tensor | None = None, mask: torch.Tensor | None = None) -> torch.Tensor:
