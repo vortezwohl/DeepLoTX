@@ -8,22 +8,22 @@ from deeplotx.nn.feed_forward import FeedForward
 
 
 class RecursiveSequential(BaseNeuralNetwork):
-    def __init__(self, input_dim: int, output_dim: int,
-                 hidden_dim: int | None = None, recursive_layers: int = 2,
-                 ffn_layers: int = 1, ffn_expansion_factor: int | float = 2,
-                 ffn_bias: bool = True, ffn_dropout_rate: float = 0.05,
-                 model_name: str | None = None, device: str | None = None,
-                 dtype: torch.dtype | None = None):
-        super().__init__(in_features=input_dim, out_features=output_dim, model_name=model_name, device=device, dtype=dtype)
-        if hidden_dim is None:
-            hidden_dim = input_dim
-        self.lstm = nn.LSTM(input_size=input_dim, hidden_size=hidden_dim,
+    def __init__(self, input_dim: int, output_dim: int, bias: bool = True,
+                 recursive_layers: int = 1, recursive_hidden_dim: int | None = None,
+                 ffn_layers: int = 1, ffn_expansion_factor: int | float = 2, dropout_rate: float = 0.05,
+                 model_name: str | None = None, device: str | None = None, dtype: torch.dtype | None = None):
+        super().__init__(in_features=input_dim, out_features=output_dim, model_name=model_name,
+                         device=device, dtype=dtype)
+        if recursive_hidden_dim is None:
+            recursive_hidden_dim = input_dim
+        self.lstm = nn.LSTM(input_size=input_dim, hidden_size=recursive_hidden_dim,
                             num_layers=recursive_layers, batch_first=True,
                             bias=True, bidirectional=True, device=self.device,
                             dtype=self.dtype)
-        self.ffn = FeedForward(feature_dim=hidden_dim * 2, num_layers=ffn_layers, expansion_factor=ffn_expansion_factor,
-                               bias=ffn_bias, dropout_rate=ffn_dropout_rate, device=self.device, dtype=self.dtype)
-        self.__proj = nn.Linear(in_features=hidden_dim * 2, out_features=output_dim, bias=ffn_bias,
+        self.ffn = FeedForward(feature_dim=recursive_hidden_dim * 2, num_layers=ffn_layers,
+                               expansion_factor=ffn_expansion_factor, bias=bias, dropout_rate=dropout_rate,
+                               device=self.device, dtype=self.dtype)
+        self.__proj = nn.Linear(in_features=recursive_hidden_dim * 2, out_features=output_dim, bias=bias,
                                 device=self.device, dtype=self.dtype)
 
     def initial_state(self, batch_size: int = 1) -> tuple[torch.Tensor, torch.Tensor]:
