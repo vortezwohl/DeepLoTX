@@ -10,18 +10,18 @@ from deeplotx.nn.self_attention import SelfAttention
 
 class RoFormerEncoder(BaseNeuralNetwork):
     def __init__(self, feature_dim: int, bias: bool = True,
-                 ffn_layers: int = 1, dropout_rate: float = 0.02,
-                 model_name: str | None = None, device: str | None = None,
-                 dtype: torch.dtype | None = None, **kwargs):
+                 ffn_layers: int = 1, ffn_expansion_factor: int | float = 2,
+                 dropout_rate: float = 0.02, model_name: str | None = None,
+                 device: str | None = None, dtype: torch.dtype | None = None, **kwargs):
         super().__init__(in_features=feature_dim, out_features=feature_dim,
                          model_name=model_name, device=device, dtype=dtype)
         self.self_attention = SelfAttention(feature_dim=feature_dim, bias=bias, positional=True,
                                             proj_layers=kwargs.get('attn_ffn_layers', 1),
-                                            proj_expansion_factor=kwargs.get('attn_expansion_factor', 2),
+                                            proj_expansion_factor=kwargs.get('attn_expansion_factor', ffn_expansion_factor),
                                             dropout_rate=kwargs.get('attn_dropout_rate', dropout_rate),
                                             device=self.device, dtype=self.dtype, **kwargs)
         self.ffn = FeedForward(feature_dim=feature_dim * 2, num_layers=ffn_layers,
-                               expansion_factor=kwargs.get('ffn_expansion_factor', 2),
+                               expansion_factor=ffn_expansion_factor,
                                bias=bias, dropout_rate=dropout_rate,
                                device=self.device, dtype=self.dtype)
         self.layer_norm = nn.LayerNorm(normalized_shape=feature_dim, eps=1e-9,
