@@ -7,7 +7,7 @@ from deeplotx.nn.feed_forward import FeedForward
 from deeplotx.nn.rope import RoPE, DEFAULT_THETA
 
 
-class SelfAttention(BaseNeuralNetwork):
+class Attention(BaseNeuralNetwork):
     def __init__(self, feature_dim: int, bias: bool = True, positional: bool = True,
                  proj_layers: int = 1, proj_expansion_factor: int | float = 1.5, dropout_rate: float = 0.02,
                  model_name: str | None = None, device: str | None = None, dtype: torch.dtype | None = None,
@@ -29,8 +29,8 @@ class SelfAttention(BaseNeuralNetwork):
             self.rope = RoPE(feature_dim=self._feature_dim, theta=kwargs.get('theta', DEFAULT_THETA),
                              device=self.device, dtype=self.dtype)
 
-    def _attention(self, x: torch.Tensor, mask: torch.Tensor | None = None) -> torch.Tensor:
-        q, k = self.q_proj(x), self.k_proj(x)
+    def _attention(self, x: torch.Tensor, y: torch.Tensor, mask: torch.Tensor | None = None) -> torch.Tensor:
+        q, k = self.q_proj(x), self.k_proj(y)
         if self._positional:
             q, k = self.rope(q), self.rope(k)
         attn = torch.matmul(q, k.transpose(-2, -1))
@@ -39,9 +39,11 @@ class SelfAttention(BaseNeuralNetwork):
         return torch.softmax(attn, dim=-1)
 
     @override
-    def forward(self, x: torch.Tensor, mask: torch.Tensor | None = None) -> torch.Tensor:
+    def forward(self, x: torch.Tensor, y: torch.Tensor | None = None, mask: torch.Tensor | None = None) -> torch.Tensor:
         x = self.ensure_device_and_dtype(x, device=self.device, dtype=self.dtype)
+        if y is None:
+            y = x
         if mask is not None:
             mask = self.ensure_device_and_dtype(mask, device=self.device, dtype=self.dtype)
-        v = self.v_proj(x)
-        return torch.matmul(self._attention(x, mask), v)
+        v = self.v_proj(y)
+        return torch.matmul(self._attention(x, y, mask), v)

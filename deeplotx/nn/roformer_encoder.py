@@ -5,7 +5,7 @@ from torch import nn
 
 from deeplotx.nn.base_neural_network import BaseNeuralNetwork
 from deeplotx.nn.feed_forward import FeedForward
-from deeplotx.nn.self_attention import SelfAttention
+from deeplotx.nn.attention import Attention
 
 
 class RoFormerEncoder(BaseNeuralNetwork):
@@ -15,11 +15,11 @@ class RoFormerEncoder(BaseNeuralNetwork):
                  device: str | None = None, dtype: torch.dtype | None = None, **kwargs):
         super().__init__(in_features=feature_dim, out_features=feature_dim,
                          model_name=model_name, device=device, dtype=dtype)
-        self.self_attention = SelfAttention(feature_dim=feature_dim, bias=bias, positional=True,
-                                            proj_layers=kwargs.get('attn_ffn_layers', 1),
-                                            proj_expansion_factor=kwargs.get('attn_expansion_factor', ffn_expansion_factor),
-                                            dropout_rate=kwargs.get('attn_dropout_rate', dropout_rate),
-                                            device=self.device, dtype=self.dtype, **kwargs)
+        self.self_attention = Attention(feature_dim=feature_dim, bias=bias, positional=True,
+                                        proj_layers=kwargs.get('attn_ffn_layers', 1),
+                                        proj_expansion_factor=kwargs.get('attn_expansion_factor', ffn_expansion_factor),
+                                        dropout_rate=kwargs.get('attn_dropout_rate', dropout_rate),
+                                        device=self.device, dtype=self.dtype, **kwargs)
         self.ffn = FeedForward(feature_dim=feature_dim * 2, num_layers=ffn_layers,
                                expansion_factor=ffn_expansion_factor,
                                bias=bias, dropout_rate=dropout_rate,

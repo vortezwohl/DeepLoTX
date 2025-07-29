@@ -3,7 +3,7 @@ from typing_extensions import override
 import torch
 from torch import nn
 
-from deeplotx.nn.self_attention import DEFAULT_THETA
+from deeplotx.nn.attention import DEFAULT_THETA
 from deeplotx.nn.recursive_sequential import RecursiveSequential
 from deeplotx.nn.roformer_encoder import RoFormerEncoder
 
