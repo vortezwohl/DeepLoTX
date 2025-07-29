@@ -20,7 +20,7 @@ class MultiHeadAttention(BaseNeuralNetwork):
         self.attn_heads = nn.ModuleList([Attention(feature_dim=self._head_dim, bias=bias, positional=positional,
                                                    proj_layers=proj_layers, proj_expansion_factor=proj_expansion_factor,
                                                    dropout_rate=dropout_rate, device=self.device, dtype=self.dtype,
-                                                   **kwargs)] * self._num_heads)
+                                                   **kwargs) for _ in range(self._num_heads)])
         self.out_proj = nn.Linear(in_features=feature_dim, out_features=feature_dim, bias=bias,
                                   device=self.device, dtype=self.dtype)
 
