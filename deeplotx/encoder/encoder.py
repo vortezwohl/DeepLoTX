@@ -48,7 +48,7 @@ class Encoder(nn.Module):
             return self.encoder.forward(_input_tup[0], attention_mask=_input_tup[1]).last_hidden_state[:, 0, :]
 
         num_chunks = math.ceil(input_ids.shape[-1] / self.embed_dim)
-        chunks = chunk_results = []
+        chunks, chunk_results = [], []
         for i in range(num_chunks):
             start_idx = i * self.embed_dim
             end_idx = min(start_idx + self.embed_dim, input_ids.shape[-1])
