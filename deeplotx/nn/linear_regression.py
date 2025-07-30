@@ -17,8 +17,8 @@ class LinearRegression(BaseNeuralNetwork):
                                                                          expansion_factor=expansion_factor,
                                                                          bias=bias, dropout_rate=dropout_rate,
                                                                          device=self.device, dtype=self.dtype) for _ in range(num_layers)])
-        self.proj = nn.Linear(in_features=input_dim, out_features=output_dim,
-                              bias=bias, device=self.device, dtype=self.dtype)
+        self.out_proj = nn.Linear(in_features=input_dim, out_features=output_dim,
+                                  bias=bias, device=self.device, dtype=self.dtype)
 
     @override
     def forward(self, x: torch.Tensor) -> torch.Tensor:
@@ -26,4 +26,4 @@ class LinearRegression(BaseNeuralNetwork):
         residual = x
         for ffn in self.multi_head_ffn_layers:
             x = ffn(x)
-        return self.proj(x + residual)
+        return self.out_proj(x + residual)

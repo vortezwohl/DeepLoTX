@@ -4,7 +4,7 @@ import torch
 from torch import nn
 
 from deeplotx.nn.base_neural_network import BaseNeuralNetwork
-from deeplotx.nn.multi_head_feed_forward import MultiHeadFeedForward
+from deeplotx.nn.linear_regression import LinearRegression
 
 
 class RecursiveSequential(BaseNeuralNetwork):
@@ -20,11 +20,10 @@ class RecursiveSequential(BaseNeuralNetwork):
                             num_layers=recursive_layers, batch_first=True,
                             bias=True, bidirectional=True, device=self.device,
                             dtype=self.dtype)
-        self.ffn = MultiHeadFeedForward(feature_dim=recursive_hidden_dim * 2, num_heads=kwargs.get('ffn_heads', 1),
-                                        num_layers=ffn_layers, expansion_factor=ffn_expansion_factor,
-                                        bias=bias, dropout_rate=dropout_rate, device=self.device, dtype=self.dtype)
-        self.__proj = nn.Linear(in_features=recursive_hidden_dim * 2, out_features=output_dim, bias=bias,
-                                device=self.device, dtype=self.dtype)
+        self.out_proj = LinearRegression(input_dim=recursive_hidden_dim * 2, output_dim=output_dim,
+                                         num_heads=kwargs.get('ffn_heads', 1), head_layers=kwargs.get('ffn_head_layers', 1),
+                                         num_layers=ffn_layers, expansion_factor=ffn_expansion_factor,
+                                         bias=bias, dropout_rate=dropout_rate, device=self.device, dtype=self.dtype)
 
     def initial_state(self, batch_size: int = 1) -> tuple[torch.Tensor, torch.Tensor]:
         zeros = torch.zeros(self.lstm.num_layers * 2, batch_size, self.lstm.hidden_size, device=self.device, dtype=self.dtype)
@@ -37,9 +36,7 @@ class RecursiveSequential(BaseNeuralNetwork):
                  self.ensure_device_and_dtype(state[1], device=self.device, dtype=self.dtype))
         x, (hidden_state, cell_state) = self.lstm(x, state)
         x = x[:, -1, :]
-        residual = x
-        x = self.ffn(x) + residual
-        x = self.__proj(x)
+        x = self.out_proj(x)
         return x, (hidden_state, cell_state)
 
     @override
