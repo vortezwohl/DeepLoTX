@@ -49,6 +49,7 @@ class TextBinaryClassifierTrainer(BaseTrainer):
             logger.warning("The dimension of features doesn't match. A new model instance will be created.")
             self.model = None
         if self.model is None:
+            ffn_heads = kwargs.get('ffn_heads', 2)
             ffn_layers = kwargs.get('ffn_layers', 5)
             ffn_expansion_factor = kwargs.get('ffn_expansion_factor', 2)
             bias = kwargs.get('bias', True)
@@ -63,11 +64,11 @@ class TextBinaryClassifierTrainer(BaseTrainer):
             self.model = LongContextRecursiveSequential(input_dim=feature_dim, output_dim=1, bias=bias,
                                                         encoder_layers=encoder_layers, attn_heads=attn_heads,
                                                         recursive_layers=recursive_layers, recursive_hidden_dim=recursive_hidden_dim,
-                                                        ffn_layers=ffn_layers, ffn_expansion_factor=ffn_expansion_factor, dropout_rate=dropout_rate,
-                                                        encoder_ffn_layers=encoder_ffn_layers, encoder_expansion_factor=encoder_expansion_factor,
-                                                        encoder_dropout_rate=encoder_dropout_rate, attn_ffn_layers=attn_ffn_layers,
-                                                        attn_expansion_factor=attn_expansion_factor, attn_dropout_rate=attn_dropout_rate,
-                                                        theta=theta).initialize_weights()
+                                                        ffn_layers=ffn_layers, ffn_heads=ffn_heads, ffn_expansion_factor=ffn_expansion_factor,
+                                                        dropout_rate=dropout_rate, encoder_ffn_layers=encoder_ffn_layers,
+                                                        encoder_expansion_factor=encoder_expansion_factor, encoder_dropout_rate=encoder_dropout_rate,
+                                                        attn_ffn_layers=attn_ffn_layers, attn_expansion_factor=attn_expansion_factor,
+                                                        attn_dropout_rate=attn_dropout_rate, theta=theta).initialize_weights()
         logger.debug(f'Training Model: \n{self.model}')
         loss_function = nn.BCELoss()
         optimizer = optim.Adamax(self.model.parameters(), lr=learning_rate)
