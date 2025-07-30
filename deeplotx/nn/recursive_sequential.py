@@ -4,14 +4,14 @@ import torch
 from torch import nn
 
 from deeplotx.nn.base_neural_network import BaseNeuralNetwork
-from deeplotx.nn.feed_forward import FeedForward
+from deeplotx.nn.multi_head_feed_forward import MultiHeadFeedForward
 
 
 class RecursiveSequential(BaseNeuralNetwork):
     def __init__(self, input_dim: int, output_dim: int, bias: bool = True,
                  recursive_layers: int = 1, recursive_hidden_dim: int | None = None,
                  ffn_layers: int = 1, ffn_expansion_factor: int | float = 2, dropout_rate: float = 0.05,
-                 model_name: str | None = None, device: str | None = None, dtype: torch.dtype | None = None):
+                 model_name: str | None = None, device: str | None = None, dtype: torch.dtype | None = None, **kwargs):
         super().__init__(in_features=input_dim, out_features=output_dim, model_name=model_name,
                          device=device, dtype=dtype)
         if recursive_hidden_dim is None:
@@ -20,9 +20,9 @@ class RecursiveSequential(BaseNeuralNetwork):
                             num_layers=recursive_layers, batch_first=True,
                             bias=True, bidirectional=True, device=self.device,
                             dtype=self.dtype)
-        self.ffn = FeedForward(feature_dim=recursive_hidden_dim * 2, num_layers=ffn_layers,
-                               expansion_factor=ffn_expansion_factor, bias=bias, dropout_rate=dropout_rate,
-                               device=self.device, dtype=self.dtype)
+        self.ffn = MultiHeadFeedForward(feature_dim=recursive_hidden_dim * 2, num_heads=kwargs.get('ffn_heads', 1),
+                                        num_layers=ffn_layers, expansion_factor=ffn_expansion_factor,
+                                        bias=bias, dropout_rate=dropout_rate, device=self.device, dtype=self.dtype)
         self.__proj = nn.Linear(in_features=recursive_hidden_dim * 2, out_features=output_dim, bias=bias,
                                 device=self.device, dtype=self.dtype)
 
