@@ -3,7 +3,8 @@ import os
 
 import torch
 from torch import nn
-from transformers import LongformerTokenizer, LongformerModel
+from transformers import AutoModel, AutoTokenizer
+from requests.exceptions import ConnectTimeout, SSLError
 
 from deeplotx import __ROOT__
 
@@ -17,18 +18,35 @@ class LongformerEncoder(nn.Module):
         super().__init__()
         self.device = torch.device(device) if device is not None \
             else torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-        self.tokenizer = LongformerTokenizer.from_pretrained(pretrained_model_name_or_path=model_name_or_path,
-                                                             cache_dir=CACHE_PATH, _from_auto=True)
-        self.bert = LongformerModel.from_pretrained(pretrained_model_name_or_path=model_name_or_path,
-                                                    cache_dir=CACHE_PATH, _from_auto=True).to(self.device)
+        try:
+            self.tokenizer = AutoTokenizer.from_pretrained(pretrained_model_name_or_path=model_name_or_path,
+                                                           cache_dir=CACHE_PATH, _from_auto=True,
+                                                           trust_remote_code=True)
+            self.encoder = AutoModel.from_pretrained(pretrained_model_name_or_path=model_name_or_path,
+                                                     cache_dir=CACHE_PATH, _from_auto=True,
+                                                     trust_remote_code=True).to(self.device)
+        except ConnectTimeout:
+            self.tokenizer = AutoTokenizer.from_pretrained(pretrained_model_name_or_path=model_name_or_path,
+                                                           cache_dir=CACHE_PATH, _from_auto=True,
+                                                           trust_remote_code=True, local_files_only=True)
+            self.encoder = AutoModel.from_pretrained(pretrained_model_name_or_path=model_name_or_path,
+                                                     cache_dir=CACHE_PATH, _from_auto=True,
+                                                     trust_remote_code=True, local_files_only=True).to(self.device)
+        except SSLError:
+            self.tokenizer = AutoTokenizer.from_pretrained(pretrained_model_name_or_path=model_name_or_path,
+                                                           cache_dir=CACHE_PATH, _from_auto=True,
+                                                           trust_remote_code=True, local_files_only=True)
+            self.encoder = AutoModel.from_pretrained(pretrained_model_name_or_path=model_name_or_path,
+                                                     cache_dir=CACHE_PATH, _from_auto=True,
+                                                     trust_remote_code=True, local_files_only=True).to(self.device)
         logger.debug(f'{LongformerEncoder.__name__} initialized on device: {self.device}.')
 
     def forward(self, input_ids: torch.Tensor, attention_mask: torch.Tensor) -> torch.Tensor:
-        ori_mode = self.bert.training
-        self.bert.eval()
+        ori_mode = self.encoder.training
+        self.encoder.eval()
         with torch.no_grad():
-            res = self.bert.forward(input_ids, attention_mask=attention_mask).last_hidden_state[:, 0, :]
-        self.bert.train(mode=ori_mode)
+            res = self.encoder.forward(input_ids, attention_mask=attention_mask).last_hidden_state[:, 0, :]
+        self.encoder.train(mode=ori_mode)
         return res
 
     def encode(self, text: str) -> torch.Tensor:
