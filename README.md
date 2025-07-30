@@ -30,24 +30,23 @@
 
 - ### 长文本嵌入
 
-    - **基于通用 BERT 的长文本嵌入** (最大支持长度, 无限长, 通过 max_length 定义)
+    - **基于通用 BERT 的长文本嵌入** (最大支持长度, 无限长, 可通过 max_length 限制长度)
 
         ```python
         from deeplotx import LongTextEncoder
 
-        # 最大文本长度为 2048 个 tokens, 块大小为 512 个 tokens, 块间重叠部分为 64 个 tokens.
+        # 块大小为 448 个 tokens, 块间重叠部分为 32 个 tokens.
         encoder = LongTextEncoder(
-            max_length=2048,
-            chunk_size=512,
-            overlapping=64
+            chunk_size=448,
+            overlapping=32
         )
-        # 对 "我是吴子豪, 这是一个测试文本." 计算嵌入, 并展平.
-        encoder.encode('我是吴子豪, 这是一个测试文本.', flatten=True, use_cache=True)
+        # 对 "我是吴子豪, 这是一个测试文本." 计算嵌入, 并堆叠.
+        encoder.encode('我是吴子豪, 这是一个测试文本.', flatten=False)
         ```
 
         输出:
         ```
-        tensor([ 0.5163,  0.2497,  0.5896,  ..., -0.9815, -0.3095,  0.4232])
+        tensor([ 2.2316e-01,  2.0300e-01,  ...,  1.5578e-01, -6.6735e-02])
         ```
 
     - **基于 Longformer 的长文本嵌入** (最大支持长度 4096 个 tokens)
@@ -57,6 +56,11 @@
 
         encoder = LongformerEncoder()
         encoder.encode('我是吴子豪, 这是一个测试文本.')
+        ```
+
+        输出:
+        ```
+        tensor([-2.7490e-02,  6.6503e-02, ..., -6.5937e-02,  6.7802e-03])
         ```
 
 - ### 相似性计算
@@ -145,14 +149,16 @@
 
     ```python
     from deeplotx import (
-        BaseNeuralNetwork,  # 深度神经网络基类
         FeedForward,  # 前馈神经网络
         LinearRegression,  # 线性回归
         LogisticRegression,  # 逻辑回归 / 二分类 / 多标签分类
         SoftmaxRegression,  # Softmax 回归 / 多分类
         RecursiveSequential,  # 序列模型 / 循环神经网络
         LongContextRecursiveSequential,  # 长上下文序列模型 / 自注意力融合循环神经网络
-        SelfAttention,  # 自注意力模块
+        RoPE,  # RoPE 位置编码
+        Attention,  # 自注意力 / 交叉注意力
+        MultiHeadAttention,  # 并行多头注意力
+        RoFormerEncoder,  # Roformer (Transformer + RoPE) 编码器模型
         AutoRegression,  # 自回归模型 / 循环神经网络
         LongContextAutoRegression  # 长上下文自回归模型 / 自注意力融合循环神经网络
     )
@@ -175,13 +181,13 @@
                     device: str | None = None, dtype: torch.dtype | None = None):
             super().__init__(in_features=feature_dim, out_features=feature_dim, model_name=model_name, device=device, dtype=dtype)
             self._dropout_rate = dropout_rate
-            self.fc1 = nn.Linear(feature_dim, int(feature_dim * expansion_factor), bias=bias,
-                                device=self.device, dtype=self.dtype)
-            self.fc2 = nn.Linear(int(feature_dim * expansion_factor), feature_dim, bias=bias,
-                                device=self.device, dtype=self.dtype)
-            self.parametric_relu_1 = nn.PReLU(num_parameters=1, init=5e-3,
+            self.up_proj = nn.Linear(in_features=feature_dim, out_features=int(feature_dim * expansion_factor),
+                                    bias=bias, device=self.device, dtype=self.dtype)
+            self.down_proj = nn.Linear(in_features=int(feature_dim * expansion_factor), out_features=feature_dim,
+                                    bias=bias, device=self.device, dtype=self.dtype)
+            self.parametric_relu = nn.PReLU(num_parameters=1, init=5e-3,
                                             device=self.device, dtype=self.dtype)
-            self.layer_norm = nn.LayerNorm(normalized_shape=self.fc1.in_features, eps=1e-9,
+            self.layer_norm = nn.LayerNorm(normalized_shape=self.up_proj.in_features, eps=1e-9,
                                         device=self.device, dtype=self.dtype)
 
         @override
@@ -189,11 +195,11 @@
             x = self.ensure_device_and_dtype(x, device=self.device, dtype=self.dtype)
             residual = x
             x = self.layer_norm(x)
-            x = self.fc1(x)
-            x = self.parametric_relu_1(x)
+            x = self.up_proj(x)
+            x = self.parametric_relu(x)
             if self._dropout_rate > .0:
                 x = torch.dropout(x, p=self._dropout_rate, train=self.training)
-            return self.fc2(x) + residual
+            return self.down_proj(x) + residual
 
 
     class FeedForward(BaseNeuralNetwork):
@@ -206,7 +212,7 @@
             self.ffn_layers = nn.ModuleList([FeedForwardUnit(feature_dim=feature_dim,
                                                             expansion_factor=expansion_factor, bias=bias,
                                                             dropout_rate=dropout_rate,
-                                                            device=self.device, dtype=self.dtype)] * num_layers)
+                                                            device=self.device, dtype=self.dtype) for _ in range(num_layers)])
 
         @override
         def forward(self, x: torch.Tensor) -> torch.Tensor:
@@ -216,7 +222,7 @@
             return x
     ```
 
-    自注意力模块:
+    注意力模块:
 
     ```python
     from typing_extensions import override
@@ -225,14 +231,17 @@
 
     from deeplotx.nn.base_neural_network import BaseNeuralNetwork
     from deeplotx.nn.feed_forward import FeedForward
+    from deeplotx.nn.rope import RoPE, DEFAULT_THETA
 
 
-    class SelfAttention(BaseNeuralNetwork):
-        def __init__(self, feature_dim: int, bias: bool = True, proj_layers: int = 1,
-                    proj_expansion_factor: int | float = 1.5, dropout_rate: float = 0.02,
-                    model_name: str | None = None, device: str | None = None, dtype: torch.dtype | None = None):
+    class Attention(BaseNeuralNetwork):
+        def __init__(self, feature_dim: int, bias: bool = True, positional: bool = True,
+                    proj_layers: int = 1, proj_expansion_factor: int | float = 1.5, dropout_rate: float = 0.02,
+                    model_name: str | None = None, device: str | None = None, dtype: torch.dtype | None = None,
+                    **kwargs):
             super().__init__(in_features=feature_dim, out_features=feature_dim, model_name=model_name,
                             device=device, dtype=dtype)
+            self._positional = positional
             self._feature_dim = feature_dim
             self.q_proj = FeedForward(feature_dim=self._feature_dim, num_layers=proj_layers,
                                     expansion_factor=proj_expansion_factor,
@@ -243,21 +252,27 @@
             self.v_proj = FeedForward(feature_dim=self._feature_dim, num_layers=proj_layers,
                                     expansion_factor=proj_expansion_factor,
                                     bias=bias, dropout_rate=dropout_rate, device=self.device, dtype=self.dtype)
+            if self._positional:
+                self.rope = RoPE(feature_dim=self._feature_dim, theta=kwargs.get('theta', DEFAULT_THETA),
+                                device=self.device, dtype=self.dtype)
 
-        def _attention(self, x: torch.Tensor, mask: torch.Tensor | None = None) -> torch.Tensor:
-            q, k = self.q_proj(x), self.k_proj(x)
+        def _attention(self, x: torch.Tensor, y: torch.Tensor, mask: torch.Tensor | None = None) -> torch.Tensor:
+            q, k = self.q_proj(x), self.k_proj(y)
+            if self._positional:
+                q, k = self.rope(q), self.rope(k)
             attn = torch.matmul(q, k.transpose(-2, -1))
             attn = attn / (self._feature_dim ** 0.5)
             attn = attn.masked_fill(mask == 0, -1e9) if mask is not None else attn
-            return torch.softmax(attn, dim=-1)
+            return torch.softmax(attn, dtype=self.dtype, dim=-1)
 
         @override
-        def forward(self, x: torch.Tensor, mask: torch.Tensor | None = None) -> torch.Tensor:
+        def forward(self, x: torch.Tensor, y: torch.Tensor | None = None, mask: torch.Tensor | None = None) -> torch.Tensor:
             x = self.ensure_device_and_dtype(x, device=self.device, dtype=self.dtype)
+            y = x if y is None else self.ensure_device_and_dtype(y, device=self.device, dtype=self.dtype)
             if mask is not None:
                 mask = self.ensure_device_and_dtype(mask, device=self.device, dtype=self.dtype)
-            v = self.v_proj(x)
-            return torch.matmul(self._attention(x, mask), v)
+            v = self.v_proj(y)
+            return torch.matmul(self._attention(x, y, mask), v)
     ```
 
 - ### 使用预定义训练器实现文本二分类任务
@@ -266,7 +281,7 @@
     from deeplotx import TextBinaryClassifierTrainer, LongTextEncoder
     from deeplotx.util import get_files, read_file
 
-    # 定义向量编码策略 (默认使用 bert-base-uncased 作为嵌入模型)
+    # 定义向量编码策略 (默认使用 FacebookAI/xlm-roberta-base 作为嵌入模型)
     long_text_encoder = LongTextEncoder(
         max_length=2048,  # 最大文本大小, 超出截断
         chunk_size=448,  # 块大小 (按 Token 计)
@@ -288,10 +303,11 @@
 
     # 开始训练
     model = trainer.train(pos_data, neg_data, 
-                          num_epochs=36, learning_rate=2e-5,  # 设置训练轮数和学习率
-                          balancing_dataset=True,  # 是否平衡数据集
-                          alpha=1e-4, rho=.2,  # 设置 elastic net 正则化的超参数 alpha 和 rho
-                          hidden_dim=256, recursive_layers=2)  # 设置循环神经网络的结构
+                        num_epochs=36, learning_rate=2e-5, 
+                        balancing_dataset=True, alpha=1e-4, 
+                        rho=.2, encoder_layers=2,  # 2 层 Roformer 编码器
+                        attn_heads=8,  # 8 个注意力头
+                        recursive_layers=2)  # 2 层 Bi-LSTM
 
     # 保存模型权重
     model.save(model_name='test_model', model_dir='model')
