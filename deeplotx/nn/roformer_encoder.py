@@ -27,8 +27,8 @@ class RoFormerEncoder(BaseNeuralNetwork):
                                device=self.device, dtype=self.dtype)
         self.layer_norm = nn.LayerNorm(normalized_shape=feature_dim, eps=1e-9,
                                        device=self.device, dtype=self.dtype)
-        self.__proj = nn.Linear(in_features=feature_dim * 2, out_features=feature_dim,
-                                bias=bias, device=self.device, dtype=self.dtype)
+        self.out_proj = nn.Linear(in_features=feature_dim * 2, out_features=feature_dim,
+                                  bias=bias, device=self.device, dtype=self.dtype)
 
     @override
     def forward(self, x: torch.Tensor, mask: torch.Tensor | None = None) -> torch.Tensor:
@@ -37,4 +37,4 @@ class RoFormerEncoder(BaseNeuralNetwork):
             mask = self.ensure_device_and_dtype(mask, device=self.device, dtype=self.dtype)
         attn = self.attn(x=self.layer_norm(x), y=None, mask=mask)
         x = torch.concat([attn, x], dim=-1)
-        return self.__proj(self.ffn(x))
+        return self.out_proj(self.ffn(x))
