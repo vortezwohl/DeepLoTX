@@ -1,5 +1,6 @@
 from .base_neural_network import BaseNeuralNetwork
 from .feed_forward import FeedForward
+from .multi_head_feed_forward import MultiHeadFeedForward
 from .linear_regression import LinearRegression
 from .logistic_regression import LogisticRegression
 from .softmax_regression import SoftmaxRegression

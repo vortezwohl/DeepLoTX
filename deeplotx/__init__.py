@@ -6,6 +6,7 @@ __ROOT__ = os.path.dirname(os.path.abspath(__file__))
 from .encoder import Encoder, LongTextEncoder, LongformerEncoder
 from .nn import (
     FeedForward,
+    MultiHeadFeedForward,
     LinearRegression,
     LogisticRegression,
     SoftmaxRegression,
