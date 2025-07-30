@@ -150,6 +150,7 @@
     ```python
     from deeplotx import (
         FeedForward,  # 前馈神经网络
+        MultiHeadFeedForward,  # 多头前馈神经网络
         LinearRegression,  # 线性回归
         LogisticRegression,  # 逻辑回归 / 二分类 / 多标签分类
         SoftmaxRegression,  # Softmax 回归 / 多分类
