@@ -43,9 +43,11 @@ class Encoder(nn.Module):
         self.embed_dim = self.encoder.config.max_position_embeddings
         logger.debug(f'{Encoder.__name__} initialized on device: {self.device}.')
 
-    def forward(self, input_ids: torch.Tensor, attention_mask: torch.Tensor, *args, **kwargs) -> torch.Tensor:
+    def forward(self, input_ids: torch.Tensor, attention_mask: torch.Tensor, cls_only: bool = True,
+                *args, **kwargs) -> torch.Tensor:
         def _encoder(_input_tup: tuple[torch.Tensor, torch.Tensor]) -> torch.Tensor:
-            return self.encoder.forward(_input_tup[0], attention_mask=_input_tup[1]).last_hidden_state[:, 0, :]
+            emb_seq = self.encoder.forward(_input_tup[0], attention_mask=_input_tup[1]).last_hidden_state
+            return emb_seq[:, 0, :] if cls_only else emb_seq
 
         num_chunks = math.ceil(input_ids.shape[-1] / self.embed_dim)
         chunks, chunk_results = [], []
@@ -58,7 +60,7 @@ class Encoder(nn.Module):
         with torch.no_grad():
             chunk_results = [_encoder(x) for x in chunks]
         self.encoder.train(mode=ori_mode)
-        return torch.cat(chunk_results, dim=-1)
+        return torch.cat(chunk_results, dim=-1) if cls_only else torch.cat(chunk_results, dim=-2)
 
     def encode(self, text: str) -> torch.Tensor:
         _input_ids = torch.tensor([self.tokenizer.encode(text)], dtype=torch.long, device=self.device)

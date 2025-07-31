@@ -25,7 +25,7 @@ class LongTextEncoder(Encoder):
         self._worker_group = ThreadPool(max_workers=max_workers)
 
     def __chunk_embedding(self, idx: int, x: torch.Tensor, mask: torch.Tensor) -> tuple[int, torch.Tensor]:
-        return idx, super().forward(x, attention_mask=mask)
+        return idx, super().forward(x, attention_mask=mask, cls_only=True)
 
     @override
     def forward(self, text: str, flatten: bool = False, *args, **kwargs) -> torch.Tensor:
