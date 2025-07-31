@@ -99,11 +99,14 @@ class BaseNeuralNetwork(nn.Module):
 
     def predict(self, x: torch.Tensor) -> torch.Tensor:
         x = self.ensure_device_and_dtype(x, device=self.device, dtype=self.dtype)
-        __train = self.training
-        self.training = False
+        training_state_dict = dict()
+        for m in self.modules():
+            training_state_dict[m] = m.training
+            m.training = False
         with torch.no_grad():
             res = self.forward(x)
-        self.training = __train
+        for m, training_state in training_state_dict.items():
+            m.training = training_state
         return res
 
     def save(self, model_name: str | None = None, model_dir: str = '.', _suffix: str = DEFAULT_SUFFIX):
