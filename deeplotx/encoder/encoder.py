@@ -62,7 +62,7 @@ class Encoder(nn.Module):
         self.encoder.train(mode=ori_mode)
         return torch.cat(chunk_results, dim=-1) if cls_only else torch.cat(chunk_results, dim=-2)
 
-    def encode(self, text: str) -> torch.Tensor:
+    def encode(self, text: str, cls_only: bool = True) -> torch.Tensor:
         _input_ids = torch.tensor([self.tokenizer.encode(text)], dtype=torch.long, device=self.device)
         _att_mask = torch.tensor([[1] * _input_ids.shape[-1]], dtype=torch.int, device=self.device)
-        return self.forward(_input_ids, _att_mask).squeeze()
+        return self.forward(input_ids=_input_ids, attention_mask=_att_mask, cls_only=cls_only).squeeze()
