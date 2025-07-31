@@ -28,7 +28,7 @@ class FeedForwardUnit(BaseNeuralNetwork):
         x = self.layer_norm(x)
         x = self.up_proj(x)
         x = self.parametric_relu(x)
-        if self._dropout_rate > .0:
+        if self._dropout_rate > .0 and self.training:
             x = torch.dropout(x, p=self._dropout_rate, train=self.training)
         return self.down_proj(x) + residual
 
