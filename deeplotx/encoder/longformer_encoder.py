@@ -9,7 +9,7 @@ from requests.exceptions import ConnectTimeout, SSLError
 from deeplotx import __ROOT__
 
 CACHE_PATH = os.path.join(__ROOT__, '.cache')
-DEFAULT_LONGFORMER = 'allenai/longformer-base-4096'
+DEFAULT_LONGFORMER = 'markussagen/xlm-roberta-longformer-base-4096'
 logger = logging.getLogger('deeplotx.embedding')
 
 
