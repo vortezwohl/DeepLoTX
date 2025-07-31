@@ -41,11 +41,12 @@ class LongformerEncoder(nn.Module):
                                                      trust_remote_code=True, local_files_only=True).to(self.device)
         logger.debug(f'{LongformerEncoder.__name__} initialized on device: {self.device}.')
 
-    def forward(self, input_ids: torch.Tensor, attention_mask: torch.Tensor) -> torch.Tensor:
+    def forward(self, input_ids: torch.Tensor, attention_mask: torch.Tensor, cls_only: bool = True) -> torch.Tensor:
         ori_mode = self.encoder.training
         self.encoder.eval()
         with torch.no_grad():
-            res = self.encoder.forward(input_ids, attention_mask=attention_mask).last_hidden_state[:, 0, :]
+            emb_seq = self.encoder.forward(input_ids, attention_mask=attention_mask).last_hidden_state
+            res = emb_seq[:, 0, :] if cls_only else emb_seq
         self.encoder.train(mode=ori_mode)
         return res
 
