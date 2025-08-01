@@ -10,6 +10,7 @@ dependencies = [
     "numpy",
     "protobuf",
     "python-dotenv",
+    "sentencepiece",
     "tiktoken",
     "torch",
     "transformers",
