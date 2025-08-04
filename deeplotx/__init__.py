@@ -4,7 +4,8 @@ import os
 __ROOT__ = os.path.dirname(os.path.abspath(__file__))
 
 from .encoder import Encoder, LongTextEncoder, LongformerEncoder
-from .ner import BertNER, NamedEntity
+from .ner.n2g import Name2Gender, Gender
+from .ner import BertNER, NamedEntity, NamedPerson
 from .nn import (
     FeedForward,
     MultiHeadFeedForward,
