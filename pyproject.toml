@@ -16,4 +16,5 @@ dependencies = [
     "transformers",
     "typing-extensions",
     "vortezwohl>=0.0.8",
+    "name2gender>=0.0.4a0",
 ]
