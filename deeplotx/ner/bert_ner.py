@@ -115,7 +115,7 @@ class BertNER(BaseNER):
             if not _continue:
                 break
         if not deduplicate:
-            return _tmp_entities
+            return sorted(_tmp_entities, key=lambda _: _.text[0], reverse=False)
         _fin_entities = dict()
         texts = set([text.text for text in _tmp_entities])
         for text in texts:
