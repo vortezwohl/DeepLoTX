@@ -126,7 +126,7 @@ class BertNER(BaseNER):
                     else:
                         if _ent.base_probability > _fin_entities[_ent.text].base_probability:
                             _fin_entities[_ent.text] = _ent
-        return [v for k, v in _fin_entities.items()]
+        return sorted([v for k, v in _fin_entities.items()], key=lambda _: _.text[0], reverse=False)
 
     def __call__(self, s: str, with_gender: bool = True, prob_threshold: float = .0, fast_mode: bool = False, *args, **kwargs):
         if fast_mode:
