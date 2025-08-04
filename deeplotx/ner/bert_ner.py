@@ -132,4 +132,5 @@ class BertNER(BaseNER):
         if fast_mode:
             return self._fast_extract(s=s, with_gender=with_gender, prob_threshold=prob_threshold)
         else:
-            return self._slow_extract(s=s, with_gender=with_gender, prob_threshold=prob_threshold, deduplicate=True)
+            return self._slow_extract(s=s, with_gender=with_gender, prob_threshold=prob_threshold,
+                                      deduplicate=kwargs.get('deduplicate', True))
