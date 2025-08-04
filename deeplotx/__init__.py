@@ -4,6 +4,7 @@ import os
 __ROOT__ = os.path.dirname(os.path.abspath(__file__))
 
 from .encoder import Encoder, LongTextEncoder, LongformerEncoder
+from .ner import BertNER, NamedEntity
 from .nn import (
     FeedForward,
     MultiHeadFeedForward,
@@ -39,4 +40,6 @@ logger.addHandler(console_handler)
 logger = logging.getLogger('deeplotx.trainer')
 logger.setLevel(logging.DEBUG)
 logger = logging.getLogger('deeplotx.embedding')
+logger.setLevel(logging.DEBUG)
+logger = logging.getLogger('deeplotx.ner')
 logger.setLevel(logging.DEBUG)
