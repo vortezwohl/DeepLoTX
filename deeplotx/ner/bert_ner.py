@@ -88,14 +88,19 @@ class BertNER(BaseNER):
         return entities
 
     def _slow_extract(self, s: str, with_gender: bool = True, prob_threshold: float = .0, deduplicate: bool = True) -> list[NamedEntity]:
-        _entities = self._fast_extract(s, with_gender=with_gender, prob_threshold=prob_threshold) if len(s) < 512 else []
-        if len(s) >= 512:
-            window_size: int = 512
-            offset = window_size // 6
-            for _offset in [- offset, offset]:
-                _window_size = window_size + _offset
-                for i in range(0, len(s) + _window_size, _window_size):
-                    _entities.extend(self._fast_extract(s[i: i + _window_size], with_gender=with_gender, prob_threshold=prob_threshold))
+        _length_threshold = 384
+        _s_seq = self.tokenizer.encode(s, add_special_tokens=False)
+        _entities = self._fast_extract(self.tokenizer.decode(_s_seq, skip_special_tokens=True),
+                                       with_gender=with_gender,
+                                       prob_threshold=prob_threshold) if len(_s_seq) < _length_threshold else []
+        # sliding window extracting
+        if len(_s_seq) >= _length_threshold:
+            _window_size = _length_threshold
+            _stride = _length_threshold // 4
+            for i in range(0, len(_s_seq) + _stride, _stride):
+                _window_text = self.tokenizer.decode(_s_seq[i: i + _window_size], skip_special_tokens=True)
+                _entities.extend(self._fast_extract(_window_text, with_gender=with_gender, prob_threshold=prob_threshold))
+        # entity combination
         _tmp_entities = sorted(_entities, key=lambda x: len(x.text), reverse=True)
         for _ent_i in _tmp_entities:
             for _ent_j in _entities:
@@ -103,6 +108,7 @@ class BertNER(BaseNER):
                         and len(_ent_j.text) != len(_ent_i.text)
                         and _ent_j in _tmp_entities):
                     _tmp_entities.remove(_ent_j)
+        # entity cleaning
         while True:
             for _ent in _tmp_entities:
                 if _ent.text not in s or len(_ent.text) < 2:
@@ -116,6 +122,7 @@ class BertNER(BaseNER):
                 break
         if not deduplicate:
             return sorted(_tmp_entities, key=lambda _: _.text[0], reverse=False)
+        # entity deduplication
         _fin_entities = dict()
         texts = set([text.text for text in _tmp_entities])
         for text in texts:
