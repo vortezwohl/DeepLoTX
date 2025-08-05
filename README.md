@@ -6,6 +6,28 @@
 
 > Author: [vortezwohl](https://github.com/vortezwohl)
 
+## Citation
+
+If you are incorporating the `DeepLoTX` framework into your research, please remember to properly cite it to acknowledge its contribution to your work.
+
+Если вы интегрируете фреймворк `DeepLoTX` в своё исследование, пожалуйста, не забудьте правильно сослаться на него, указывая его вклад в вашу работу.
+
+もしあなたが研究に `DeepLoTX` フレームワークを組み入れているなら、その貢献を認めるために適切に引用することを忘れないでください.
+
+如果您正在將 `DeepLoTX` 框架整合到您的研究中，請務必正確引用它，以聲明它對您工作的貢獻.
+
+```bibtex
+@software{Wu_DeepLoTX_2025,
+author = {Wu, Zihao},
+license = {GPL-3.0},
+month = aug,
+title = {{DeepLoTX}},
+url = {https://github.com/vortezwohl/DeepLoTX},
+version = {0.9.5},
+year = {2025}
+}
+```
+
 ## Installation
 
 - **With pip**
