@@ -12,7 +12,7 @@ from deeplotx.ner.named_entity import NamedEntity, NamedPerson
 
 CACHE_PATH = os.path.join(__ROOT__, '.cache')
 NEW_LINE, BLANK = '\n', ' '
-DEFAULT_LENGTH_THRESHOLD = 384
+DEFAULT_LENGTH_THRESHOLD = 448
 DEFAULT_BERT_NER = 'Davlan/xlm-roberta-base-ner-hrl'
 N2G_MODEL: list[Name2Gender] = []
 logger = logging.getLogger('deeplotx.ner')
