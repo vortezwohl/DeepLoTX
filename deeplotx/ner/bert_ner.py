@@ -85,7 +85,7 @@ class BertNER(BaseNER):
             if ent[1].upper().startswith('B'):
                 ent[1] = ent[1].upper()[1:].strip('-')
         if len(entities) > 0:
-            logger.debug(f'Entities: {[_[0] for _ in entities]} extracted from "{s}".')
+            logger.debug(f'Entities: {[_[0] for _ in entities]}, extracted from: "{s.strip()}".')
         entities = [NamedEntity(*_) for _ in entities if _[2] >= prob_threshold]
         if not with_gender:
             return entities
