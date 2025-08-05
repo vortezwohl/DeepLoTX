@@ -11,6 +11,7 @@ from deeplotx.ner.base_ner import BaseNER
 from deeplotx.ner.named_entity import NamedEntity, NamedPerson
 
 CACHE_PATH = os.path.join(__ROOT__, '.cache')
+NEW_LINE, BLANK = '\n', ' '
 DEFAULT_LENGTH_THRESHOLD = 384
 DEFAULT_BERT_NER = 'Davlan/xlm-roberta-base-ner-hrl'
 N2G_MODEL: list[Name2Gender] = []
@@ -49,7 +50,7 @@ class BertNER(BaseNER):
 
     def _fast_extract(self, s: str, with_gender: bool = True, prob_threshold: float = .0) -> list[NamedEntity]:
         assert prob_threshold <= 1., f'prob_threshold ({prob_threshold}) cannot be larger than 1.'
-        s = f' {s} '
+        s = f' {s.replace(NEW_LINE, BLANK)} '
         raw_entities = self._ner_pipeline(s)
         entities = []
         for ent in raw_entities:
@@ -83,6 +84,8 @@ class BertNER(BaseNER):
                     ent[0] = ent[0][:-1]
             if ent[1].upper().startswith('B'):
                 ent[1] = ent[1].upper()[1:].strip('-')
+        if len(entities) > 0:
+            logger.debug(f'Entities: {[_[0] for _ in entities]} extracted from "{s}".')
         entities = [NamedEntity(*_) for _ in entities if _[2] >= prob_threshold]
         if not with_gender:
             return entities
