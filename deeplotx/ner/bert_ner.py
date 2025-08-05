@@ -44,7 +44,7 @@ class BertNER(BaseNER):
                                                                            trust_remote_code=True, local_files_only=True).to(self.device)
         self.embed_dim = self.encoder.config.max_position_embeddings
         self._ner_pipeline = pipeline(task='ner', model=self.encoder, tokenizer=self.tokenizer, trust_remote_code=True)
-        logger.debug(f'{BaseNER.__name__} initialized on device: {self.device}.')
+        logger.debug(f'{BertNER.__name__} initialized on device: {self.device}.')
 
     def _fast_extract(self, s: str, with_gender: bool = True, prob_threshold: float = .0) -> list[NamedEntity]:
         assert prob_threshold <= 1., f'prob_threshold ({prob_threshold}) cannot be larger than 1.'
