@@ -60,7 +60,10 @@ class BertNER(BaseNER):
                 if len(ent[0].strip()) < 1:
                     del entities[i]
                 if ent[1].upper().startswith('I') and entities[i - 1][1].upper().startswith('B'):
-                    entities[i - 1][0] += ent[0]
+                    if entities[i - 1][0] + ent[0] in s:
+                        entities[i - 1][0] += ent[0]
+                    else:
+                        entities[i - 1][0] += f' {ent[0]}'
                     entities[i - 1][2] *= ent[2]
                     del entities[i]
             _continue = False
