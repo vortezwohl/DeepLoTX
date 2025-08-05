@@ -115,7 +115,10 @@ class BertNER(BaseNER):
         if len(_s_seq) >= window_size:
             _stride = window_size // 4
             for i in range(0, len(_s_seq) + window_size, _stride):
-                _window_text = self.tokenizer.decode(_s_seq[i: i + window_size], skip_special_tokens=True)
+                _tmp_s_seq = _s_seq[i: i + window_size]
+                if len(_tmp_s_seq) < 1:
+                    continue
+                _window_text = self.tokenizer.decode(_tmp_s_seq, skip_special_tokens=True)
                 _entities.extend(self._fast_extract(_window_text, with_gender=with_gender, prob_threshold=prob_threshold))
         # entity combination
         _tmp_entities = sorted(_entities, key=lambda x: len(x.text), reverse=True)
