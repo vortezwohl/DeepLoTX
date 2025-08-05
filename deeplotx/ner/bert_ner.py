@@ -11,6 +11,7 @@ from deeplotx.ner.base_ner import BaseNER
 from deeplotx.ner.named_entity import NamedEntity, NamedPerson
 
 CACHE_PATH = os.path.join(__ROOT__, '.cache')
+DEFAULT_LENGTH_THRESHOLD = 384
 DEFAULT_BERT_NER = 'Davlan/xlm-roberta-base-ner-hrl'
 N2G_MODEL: list[Name2Gender] = []
 logger = logging.getLogger('deeplotx.ner')
@@ -99,7 +100,7 @@ class BertNER(BaseNER):
         return entities
 
     def _slow_extract(self, s: str, with_gender: bool = True, prob_threshold: float = .0, deduplicate: bool = True) -> list[NamedEntity]:
-        _length_threshold = 384
+        _length_threshold = DEFAULT_LENGTH_THRESHOLD
         _s_seq = self.tokenizer.encode(s, add_special_tokens=False)
         _entities = self._fast_extract(self.tokenizer.decode(_s_seq, skip_special_tokens=True),
                                        with_gender=with_gender,
