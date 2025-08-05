@@ -69,6 +69,17 @@ class BertNER(BaseNER):
                 break
         for ent in entities:
             ent[0] = ent[0].strip()
+            # stripping
+            while not ent[0][0].isalpha():
+                if len(ent[0]) < 2:
+                    break
+                if not ent[0][0].isnumeric():
+                    ent[0] = ent[0][1:]
+            while not ent[0][-1].isalpha():
+                if len(ent[0]) < 2:
+                    break
+                if not ent[0][-1].isnumeric():
+                    ent[0] = ent[0][:-1]
             if ent[1].upper().startswith('B'):
                 ent[1] = ent[1].upper()[1:].strip('-')
         entities = [NamedEntity(*_) for _ in entities if _[2] >= prob_threshold]
