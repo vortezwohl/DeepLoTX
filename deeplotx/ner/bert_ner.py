@@ -105,18 +105,17 @@ class BertNER(BaseNER):
                                           gender_probability=gender_prob)
         return entities
 
-    def _slow_extract(self, s: str, with_gender: bool = True, prob_threshold: float = .0, deduplicate: bool = True) -> list[NamedEntity]:
-        _length_threshold = DEFAULT_LENGTH_THRESHOLD
+    def _slow_extract(self, s: str, with_gender: bool = True, prob_threshold: float = .0,
+                      window_size: int = DEFAULT_LENGTH_THRESHOLD, deduplicate: bool = True) -> list[NamedEntity]:
         _s_seq = self.tokenizer.encode(s, add_special_tokens=False)
         _entities = self._fast_extract(self.tokenizer.decode(_s_seq, skip_special_tokens=True),
                                        with_gender=with_gender,
-                                       prob_threshold=prob_threshold) if len(_s_seq) < _length_threshold else []
+                                       prob_threshold=prob_threshold) if len(_s_seq) < window_size else []
         # sliding window extracting
-        if len(_s_seq) >= _length_threshold:
-            _window_size = _length_threshold
-            _stride = _length_threshold // 4
+        if len(_s_seq) >= window_size:
+            _stride = window_size // 4
             for i in range(0, len(_s_seq) + _stride, _stride):
-                _window_text = self.tokenizer.decode(_s_seq[i: i + _window_size], skip_special_tokens=True)
+                _window_text = self.tokenizer.decode(_s_seq[i: i + window_size], skip_special_tokens=True)
                 _entities.extend(self._fast_extract(_window_text, with_gender=with_gender, prob_threshold=prob_threshold))
         # entity combination
         _tmp_entities = sorted(_entities, key=lambda x: len(x.text), reverse=True)
@@ -158,4 +157,5 @@ class BertNER(BaseNER):
             return self._fast_extract(s=s, with_gender=with_gender, prob_threshold=prob_threshold)
         else:
             return self._slow_extract(s=s, with_gender=with_gender, prob_threshold=prob_threshold,
+                                      window_size=kwargs.get('window_size', DEFAULT_LENGTH_THRESHOLD),
                                       deduplicate=kwargs.get('deduplicate', True))
