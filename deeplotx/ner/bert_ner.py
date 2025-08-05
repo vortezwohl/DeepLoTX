@@ -50,7 +50,7 @@ class BertNER(BaseNER):
 
     def _fast_extract(self, s: str, with_gender: bool = True, prob_threshold: float = .0) -> list[NamedEntity]:
         assert prob_threshold <= 1., f'prob_threshold ({prob_threshold}) cannot be larger than 1.'
-        s = f' {s.replace(NEW_LINE, BLANK)} '
+        s = f' {s.replace(NEW_LINE, BLANK * 2)} '
         raw_entities = self._ner_pipeline(s)
         entities = []
         for ent in raw_entities:
