@@ -13,6 +13,16 @@ def read_file(path: str, encoding: str = 'utf-8') -> str:
             pass
 
 
+def write_file(content: str | bytes, path: str, encoding: str = 'utf-8') -> str:
+    if isinstance(content, bytes):
+        with open(path, mode='wb') as f:
+            f.write(content)
+        return path
+    with open(path, mode='w', encoding=encoding) as f:
+        f.write(content)
+    return path
+
+
 def get_files(path: str) -> list:
     if os.path.exists(path):
         entries = os.listdir(path)
