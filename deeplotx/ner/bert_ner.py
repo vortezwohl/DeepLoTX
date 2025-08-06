@@ -74,6 +74,8 @@ class BertNER(BaseNER):
                 break
         for ent in entities:
             ent[0] = ent[0].strip()
+            if len(ent[0]) < 1:
+                ent[0] = ' '
             # stripping
             while not ent[0][0].isalpha():
                 if len(ent[0]) < 2:
