@@ -1,6 +1,6 @@
 [project]
 name = "deeplotx"
-version = '0.9.7.beta'
+version = '0.9.8.alpha'
 description = "An out-of-the-box long-text NLP framework."
 readme = "README.md"
 requires-python = ">=3.10"
