@@ -14,6 +14,7 @@ def read_file(path: str, encoding: str = 'utf-8') -> str:
 
 
 def write_file(content: str | bytes, path: str, encoding: str = 'utf-8') -> str:
+    os.makedirs(os.path.dirname(path), exist_ok=True)
     if isinstance(content, bytes):
         with open(path, mode='wb') as f:
             f.write(content)
