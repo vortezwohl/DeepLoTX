@@ -3,8 +3,8 @@ import os
 
 import torch
 from torch import nn
+from requests.exceptions import RequestException
 from transformers import AutoModel, AutoTokenizer
-from requests.exceptions import ConnectTimeout, SSLError
 
 from deeplotx import __ROOT__
 
@@ -25,14 +25,7 @@ class LongformerEncoder(nn.Module):
             self.encoder = AutoModel.from_pretrained(pretrained_model_name_or_path=model_name_or_path,
                                                      cache_dir=CACHE_PATH, _from_auto=True,
                                                      trust_remote_code=True).to(self.device)
-        except ConnectTimeout:
-            self.tokenizer = AutoTokenizer.from_pretrained(pretrained_model_name_or_path=model_name_or_path,
-                                                           cache_dir=CACHE_PATH, _from_auto=True,
-                                                           trust_remote_code=True, local_files_only=True)
-            self.encoder = AutoModel.from_pretrained(pretrained_model_name_or_path=model_name_or_path,
-                                                     cache_dir=CACHE_PATH, _from_auto=True,
-                                                     trust_remote_code=True, local_files_only=True).to(self.device)
-        except SSLError:
+        except RequestException:
             self.tokenizer = AutoTokenizer.from_pretrained(pretrained_model_name_or_path=model_name_or_path,
                                                            cache_dir=CACHE_PATH, _from_auto=True,
                                                            trust_remote_code=True, local_files_only=True)
