@@ -21,7 +21,6 @@ from .nn import (
     AutoRegression,
     LongContextAutoRegression
 )
-from .trainer import TextBinaryClassifierTrainer
 
 __AUTHOR__ = '吴子豪 / Vortez Wohl'
 __EMAIL__ = 'vortez.wohl@gmail.com'
