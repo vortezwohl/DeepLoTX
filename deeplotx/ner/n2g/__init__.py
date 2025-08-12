@@ -18,7 +18,7 @@ _MIN_FILE_SIZE = 1024 * 5
 
 
 def download_model(model_name: str):
-    quiet = bool(os.getenv('QUIET_DOWNLOAD', False))
+    quiet = bool(os.getenv('N2G_QUIET_DOWNLOAD', False))
     os.makedirs(__CACHE_DIR__, exist_ok=True)
     _proxies = {
         'http': os.getenv('HTTP_PROXY', os.getenv('http_proxy')),
