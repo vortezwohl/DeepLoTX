@@ -43,12 +43,15 @@ class BertNER(BaseNER):
 
     def _fast_extract(self, s: str, with_gender: bool = True, prob_threshold: float = .0) -> list[NamedEntity]:
         assert prob_threshold <= 1., f'prob_threshold ({prob_threshold}) cannot be larger than 1.'
+        # entity length cannot be longer than the whole seq
+        __max_search_backward = len(self.tokenizer.encode(s, add_special_tokens=False))
         s = f' {s.replace(NEW_LINE, BLANK * 2)} '
         raw_entities = self._ner_pipeline(s)
         entities = []
         for ent in raw_entities:
             entities.append([s[ent['start']: ent['end']], ent['entity'], ent['score'].item()])
-        while True:
+        __search_backward = -2
+        while __search_backward < __max_search_backward:
             for i, ent in enumerate(entities):
                 if len(ent[0].strip()) < 1:
                     del entities[i]
@@ -65,6 +68,11 @@ class BertNER(BaseNER):
                     _continue = True
             if not _continue:
                 break
+            __search_backward += 1
+        # adjust all I-ENTs
+        for ent in entities:
+            if ent[1].upper().startswith('I'):
+                ent[1] = f'B{ent[1][1:]}'
         for ent in entities:
             ent[0] = ent[0].strip()
             if len(ent[0]) < 1:
