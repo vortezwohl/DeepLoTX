@@ -15,6 +15,6 @@ dependencies = [
     "torch",
     "transformers",
     "typing-extensions",
-    "vortezwohl>=0.0.9",
+    "vortezwohl>=0.0.10",
     "name4py>=0.1.4",
 ]
