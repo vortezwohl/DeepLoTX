@@ -7,7 +7,7 @@ from vortezwohl.concurrent import ThreadPool
 from vortezwohl.cache import LRUCache
 
 from deeplotx.encoder.encoder import Encoder, DEFAULT_BERT
-from deeplotx.util.hash import sha512
+from deeplotx.util import sha512
 
 logger = logging.getLogger('deeplotx.embedding')
 
