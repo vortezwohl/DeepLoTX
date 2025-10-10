@@ -10,13 +10,15 @@ DEFAULT_SUFFIX = 'dlx'
 
 class BaseNeuralNetwork(nn.Module):
     def __init__(self, in_features: int, out_features: int, model_name: str | None = None,
-                 device: str | None = None, dtype: torch.dtype | None = None):
+                 device: str | torch.device | None = None, dtype: torch.dtype | None = None):
         super().__init__()
         self._model_name = model_name \
             if model_name is not None \
             else self.__class__.__name__
-        self.device = torch.device(device) if device is not None \
-            else torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+        self.device = device if isinstance(device, torch.device) else None
+        if self.device is None:
+            self.device = torch.device(device) if device is not None \
+                else torch.device('cuda' if torch.cuda.is_available() else 'cpu')
         self.dtype = dtype if dtype is not None else torch.float32
         self._in_features = in_features
         self._out_features = out_features
