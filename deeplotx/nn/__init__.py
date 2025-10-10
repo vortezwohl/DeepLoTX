@@ -7,6 +7,7 @@ from .softmax_regression import SoftmaxRegression
 from .recursive_sequential import RecursiveSequential
 from .long_context_recursive_sequential import LongContextRecursiveSequential
 from .rope import RoPE
+from .lora import LoRA
 from .attention import Attention
 from .multi_head_attention import MultiHeadAttention
 from .roformer_encoder import RoFormerEncoder

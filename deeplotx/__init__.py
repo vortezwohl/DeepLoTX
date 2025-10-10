@@ -15,6 +15,7 @@ from .nn import (
     RecursiveSequential,
     LongContextRecursiveSequential,
     RoPE,
+    LoRA,
     Attention,
     MultiHeadAttention,
     RoFormerEncoder,
