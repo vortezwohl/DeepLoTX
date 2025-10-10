@@ -33,12 +33,12 @@ class LoRA(BaseNeuralNetwork):
         return original_out + lora_out
 
     @staticmethod
-    def apply_to(model: nn.Module, layer_names: list[str] | str, rank: int = 8, alpha: int = 16,
-                 dropout_rate: float = .0):
-        if isinstance(layer_names, str):
-            layer_names = [layer_names]
+    def apply_to(model: nn.Module, target_modules: list[str] | str, rank: int = 8, alpha: int = 16,
+                 dropout_rate: float = .0) -> nn.Module:
+        if isinstance(target_modules, str):
+            target_modules = [target_modules]
         for layer_name, module in model.named_modules():
-            if any(_name in layer_name.split('.')[-1] for _name in layer_names):
+            if any(_name in layer_name.split('.')[-1] for _name in target_modules):
                 lora = LoRA(input_dim=module.in_features, output_dim=module.out_features,
                             rank=rank, alpha=alpha, dropout_rate=dropout_rate,
                             device=next(module.parameters()).device,
