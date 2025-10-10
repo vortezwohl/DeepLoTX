@@ -136,6 +136,21 @@ year = {2025}
     (<Gender.Male: 'male'>, 1.0)
     ```
 
+- ### Apply LoRA to a model
+
+    Import dependencies
+
+    ```python
+    from deeplotx import LoRA
+    ```
+
+    Assumed that the `model` has been loaded
+
+    ```python
+    model = ...  # Maybe an LLM or some other deep neural network models
+    lora_model = LoRA.apply_to(model, target_modules=['q_proj'], rank=16, alpha=32, dropout_rate=.05)
+    ```
+
 - ### Long text embedding
 
     - **BERT based long text embedding**
@@ -252,6 +267,7 @@ year = {2025}
         RecursiveSequential, 
         LongContextRecursiveSequential, 
         RoPE, 
+        LoRA, 
         Attention, 
         MultiHeadAttention, 
         RoFormerEncoder, 
@@ -369,36 +385,4 @@ year = {2025}
                 mask = self.ensure_device_and_dtype(mask, device=self.device, dtype=self.dtype)
             v = self.v_proj(y)
             return torch.matmul(self._attention(x, y, mask), v)
-    ```
-
-- ### Text binary classification task with predefined trainer
-
-    ```python
-    from deeplotx import TextBinaryClassifierTrainer, LongTextEncoder
-    from deeplotx.util import get_files, read_file
-
-    long_text_encoder = LongTextEncoder(
-        max_length=2048, 
-        chunk_size=448, 
-        overlapping=32, 
-        cache_capacity=512 
-    )
-    trainer = TextBinaryClassifierTrainer(
-        long_text_encoder=long_text_encoder,
-        batch_size=2,
-        train_ratio=0.9 
-    )
-    pos_data_path = 'path/to/pos_dir'
-    neg_data_path = 'path/to/neg_dir'
-    pos_data = [read_file(x) for x in get_files(pos_data_path)]
-    neg_data = [read_file(x) for x in get_files(neg_data_path)]
-    model = trainer.train(pos_data, neg_data, 
-                        num_epochs=36, learning_rate=2e-5, 
-                        balancing_dataset=True, alpha=1e-4, 
-                        rho=.2, encoder_layers=2, 
-                        attn_heads=8, 
-                        recursive_layers=2) 
-    model.save(model_name='test_model', model_dir='model')
-    model = model.load(model_name='test_model', model_dir='model')
-    model.predict(long_text_encoder.encode('这是一个测试文本.', flatten=False))
     ```
